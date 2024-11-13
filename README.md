@@ -1,8 +1,37 @@
-# React + Vite
+# TutoSupport
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+## Getting Started
 
-Currently, two official plugins are available:
+Follow these steps to set up and run the project in development mode.
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react/README.md) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+### Prerequisites
+
+- Ensure you have **Node.js** and **npm** installed on your machine.
+
+### Installation
+
+1. **Install dependencies:**
+
+   ```bash
+   npm install
+   ```
+
+2. **Set up environment:**
+
+   - Copy `.env.example` and rename it to `.env`:
+
+     ```bash
+     cp .env.example .env
+     ```
+
+   - Open `.env` and fill in each field with your Firebase configuration values.
+
+3. **Run in development mode:**
+
+   ```bash
+   npm run dev
+   ```
+
+---
+
+### Additional Notes

@@ -1,5 +1,5 @@
 import { doc, setDoc, getDoc } from 'firebase/firestore';
-import { db } from '../config/firebase';
+import { db } from "../config/firebase.ts";
 
 interface UserData {
   userId: string;
