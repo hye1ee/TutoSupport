@@ -8,10 +8,12 @@ interface TimelineProps {
   max: number;
   value: number;
   setValue: React.Dispatch<React.SetStateAction<number>>;
+  setIsSeeking: React.Dispatch<React.SetStateAction<boolean>>;
 }
 
 export default function Timeline(props: TimelineProps) {
   const sliderRef = useRef<HTMLDivElement>(null);
+  const handle = document.getElementById("handle") as HTMLDivElement;
 
   useEffect(() => {
     return () => {
@@ -19,6 +21,13 @@ export default function Timeline(props: TimelineProps) {
       document.removeEventListener("pointerup", onPointerUp);
     };
   }, []);
+
+  useEffect(() => {
+    // update handle position depends on the value
+    if (!handle) return;
+    const pos = ((props.value - props.min) / (props.max - props.min)) * 100;
+    handle.style.left = `calc(${pos}% - ${handlesize / 2}px)`;
+  }, [props.value]);
 
   const onPointerMove = (event: MouseEvent) => {
     if (!sliderRef.current) return;
@@ -36,17 +45,19 @@ export default function Timeline(props: TimelineProps) {
   const onPointerDown = () => {
     document.addEventListener("pointermove", onPointerMove);
     document.addEventListener("pointerup", onPointerUp);
+    props.setIsSeeking(true);
   };
 
   const onPointerUp = () => {
     document.removeEventListener("pointermove", onPointerMove);
     document.removeEventListener("pointerup", onPointerUp);
+    props.setIsSeeking(false);
   };
 
   return (
     <TimelineWrapper ref={sliderRef}>
       <Handle
-        pos={((props.value - props.min) / (props.max - props.min)) * 100}
+        id="handle"
         onPointerDown={onPointerDown}
         onPointerUp={onPointerUp}
       />
@@ -71,12 +82,12 @@ const TimelineWrapper = styled.div`
   background-color: gray;
 `;
 
-const Handle = styled.div<{ pos: number }>`
+const Handle = styled.div`
   width: ${`${handlesize}px`};
   height: ${`${handlesize}px`};
 
   position: absolute;
-  left: ${(props) => `calc(${props.pos}% - ${handlesize / 2}px)`};
+  left: 0px;
   top: 50%;
   transform: translate(0%, -50%);
 

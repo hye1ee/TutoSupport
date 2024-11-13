@@ -1,5 +1,6 @@
 import { collection, setDoc, doc, getDoc, getDocs } from 'firebase/firestore';
 import { db } from "../config/firebase.ts";
+import { Video } from './types';
 
 // Interface for video data
 interface VideoData {
@@ -24,13 +25,13 @@ export const createVideo = async (videoData: VideoData) => {
 };
 
 // Function to get all videos
-export const getAllVideos = async () => {
+export const getAllVideos = async (): Promise<Video[]> => {
   try {
     const videosSnapshot = await getDocs(collection(db, 'videos'));
     const videos = videosSnapshot.docs.map(doc => ({
       id: doc.id,
       ...doc.data()
-    }));
+    })) as Video[];
     return videos;
   } catch (error) {
     console.error('Error getting videos:', error);
