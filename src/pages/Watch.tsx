@@ -1,12 +1,38 @@
-import { useParams } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import styled from "styled-components";
+import Timeline from "../components/Timeline";
+import Video from "../components/Video";
+import { useEffect, useState } from "react";
 
 export default function Watch() {
-  const watchId = useParams().watchId;
+  const [time, setTime] = useState<number>(0);
+  const [duration, setDuration] = useState<number>(0);
+
+  const watchId = useParams().watchId as string;
+  const navigate = useNavigate();
+  const onDuration = (newDuration: number) => {
+    setDuration(newDuration);
+  };
+  const onProgress = (playedTime: number) => {
+    setTime(playedTime);
+  };
+
+  useEffect(() => {
+    if (watchId === undefined) navigate("/");
+  }, []);
 
   return (
     <PageWrapper>
-      <VideoWrapper>this is Watch page {watchId}</VideoWrapper>
+      <VideoWrapper>
+        this is Watch page {watchId}
+        <Video
+          id={watchId}
+          time={time}
+          onDuration={onDuration}
+          onProgress={onProgress}
+        />
+        <Timeline min={0} max={duration} value={time} setValue={setTime} />
+      </VideoWrapper>
       <CommentWrapper>This is Comment Section</CommentWrapper>
     </PageWrapper>
   );
