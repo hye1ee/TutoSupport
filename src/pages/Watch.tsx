@@ -36,6 +36,7 @@ export default function Watch() {
   // get total video length
   const onDuration = (newDuration: number) => {
     setDuration(newDuration);
+    console.log(newDuration);
   };
 
   // get current video time
@@ -93,6 +94,11 @@ export default function Watch() {
           value={time}
           setValue={setTime}
           setIsSeeking={setIsSeeking}
+          sections={[
+            { sectionName: "section1", startTime: 0, endTime: 1000 },
+            { sectionName: "section2", startTime: 1000, endTime: 2000 },
+            { sectionName: "section3", startTime: 2000, endTime: 2568 },
+          ]}
         />
       </VideoWrapper>
 

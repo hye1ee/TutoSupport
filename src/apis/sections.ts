@@ -2,7 +2,7 @@
 import { collection, setDoc, addDoc, doc, getDoc, getDocs } from 'firebase/firestore';
 import { db } from "../config/firebase.ts";
 
-interface SectionData {
+export interface SectionData {
   sectionName: string;
   startTime: number;
   endTime: number;
