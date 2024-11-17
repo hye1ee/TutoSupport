@@ -4,7 +4,7 @@ import { Video } from './types';
 
 // Interface for video data
 interface VideoData {
-  videoUrl: string;
+  videoId: string;
   title: string;
   description: string;
   userId: string;
@@ -15,7 +15,7 @@ interface VideoData {
 export const createVideo = async (videoData: VideoData) => {
   try {
     // Create a URL-safe ID by encoding the URL
-    const safeId = encodeURIComponent(videoData.videoUrl);
+    const safeId = encodeURIComponent(videoData.videoId);
     await setDoc(doc(db, 'videos', safeId), videoData);
     return safeId;
   } catch (error) {
@@ -39,10 +39,9 @@ export const getAllVideos = async (): Promise<Video[]> => {
   }
 };
 
-export const getVideoByUrl = async (videoUrl: string) => {
+export const getVideoByUrl = async (videoId: string) => {
   try {
-    const safeId = encodeURIComponent(videoUrl);
-    const videoDoc = await getDoc(doc(db, 'videos', safeId));
+    const videoDoc = await getDoc(doc(db, 'videos', videoId));
     if (videoDoc.exists()) {
       return { id: videoDoc.id, ...videoDoc.data() };
     } else {
@@ -54,9 +53,8 @@ export const getVideoByUrl = async (videoUrl: string) => {
   }
 };
 
-export const clapVideo = async (videoUrl: string) => {
+export const clapVideo = async (videoId: string) => {
   try {
-    const videoId = encodeURIComponent(videoUrl);
     const videoRef = doc(db, 'videos', videoId);
     const videoDoc = await getDoc(videoRef);
 

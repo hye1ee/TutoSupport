@@ -142,8 +142,6 @@ const TimelineWrapper = styled.div`
 
   display: flex;
   flex-direction: row;
-
-  background-color: #d5e3f8;
 `;
 
 const TimelineBackground = styled.div`
@@ -156,6 +154,9 @@ const TimelineBackground = styled.div`
 
   display: flex;
   flex-direction: row;
+
+  border-radius: 0px 0px 12px 12px;
+  overflow: hidden;
 `;
 
 const TimelineItem = styled.div`
