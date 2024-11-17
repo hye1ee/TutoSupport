@@ -6,9 +6,15 @@ export default function Header() {
 
   return (
     <HeaderWrapper>
-      <button onClick={() => navigate("/")}>Home Logo</button>
-
-      <div>Welcome to the tuto support!</div>
+      <img
+        style={{ width: "auto", height: "40px", cursor: "pointer" }}
+        src="src/assets/Icon_logo.png"
+        onClick={() => navigate("/")}
+      />
+      <img
+        style={{ width: "auto", height: "40px" }}
+        src="src/assets/Icon_user.png"
+      />
     </HeaderWrapper>
   );
 }
@@ -16,12 +22,15 @@ export default function Header() {
 const HeaderWrapper = styled.div`
   width: 100%;
   height: 60px;
+  flex: 0 0 auto;
 
   box-sizing: border-box;
-  padding: 0px 16px;
+  padding: 0px 36px;
 
-  border-bottom: 1px solid gray;
+  /* border-bottom: 1px solid gray; */
 
   display: flex;
   flex-direction: row;
+  align-items: flex-end;
+  justify-content: space-between;
 `;
