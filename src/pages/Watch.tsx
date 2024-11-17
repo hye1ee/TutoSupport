@@ -61,7 +61,6 @@ export default function Watch() {
   return (
     <PageWrapper>
       <VideoWrapper>
-        this is Watch page {watchId}
         <VideoContainer
           onPointerEnter={() => setIsHover(true)}
           onPointerLeave={() => setIsHover(false)}

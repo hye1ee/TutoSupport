@@ -101,7 +101,7 @@ export default function Home() {
           ))}
         </>
       ) : (
-        <HashLoader color="#9D5C63" />
+        <HashLoader color="#9D5C63" style={{ alignSelf: "center" }} />
       )}
     </PageWrapper>
   );

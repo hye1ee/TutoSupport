@@ -8,9 +8,9 @@ interface SectionData {
   endTime: number;
 }
 
-export const addSection = async (videoUrl: string, sectionData: SectionData) => {
+export const addSection = async (videoId: string, sectionData: SectionData) => {
   try {
-    const videoId = encodeURIComponent(videoUrl);
+    // const videoId = encodeURIComponent(videoId);
     const sectionsRef = collection(db, 'videos', videoId, 'sections');
     const docRef = await addDoc(sectionsRef, sectionData);
     return docRef.id;
@@ -20,9 +20,9 @@ export const addSection = async (videoUrl: string, sectionData: SectionData) => 
   }
 };
 
-export const getSections = async (videoUrl: string) => {
+export const getSections = async (videoId: string) => {
   try {
-    const videoId = encodeURIComponent(videoUrl);
+    // const videoId = encodeURIComponent(videoId);
     const sectionsSnapshot = await getDocs(collection(db, 'videos', videoId, 'sections'));
     return sectionsSnapshot.docs.map(doc => ({
       id: doc.id,

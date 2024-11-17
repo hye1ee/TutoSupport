@@ -7,7 +7,7 @@ export const signInWithGoogle = async () => {
   try {
     const result = await signInWithPopup(auth, googleProvider);
     const user = result.user;
-    
+
     // Create/update user in Firestore using your existing createUser function
     await createUser({
       userId: user.uid,

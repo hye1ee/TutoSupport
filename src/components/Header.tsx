@@ -1,5 +1,6 @@
 import { useNavigate } from "react-router-dom";
 import styled from "styled-components";
+import { signInWithGoogle } from "../services/auth";
 
 export default function Header() {
   const navigate = useNavigate();
@@ -7,17 +8,55 @@ export default function Header() {
   return (
     <HeaderWrapper>
       <img
-        style={{ width: "auto", height: "40px", cursor: "pointer" }}
+        style={{ width: "auto", height: "36px", cursor: "pointer" }}
         src="src/assets/Icon_logo.png"
         onClick={() => navigate("/")}
       />
-      <img
-        style={{ width: "auto", height: "40px" }}
-        src="src/assets/Icon_user.png"
-      />
+      <div style={{ display: "flex", flexDirection: "row", gap: "4px" }}>
+        <Bubble text="Please Login First!" />
+        <img
+          onClick={signInWithGoogle}
+          style={{ width: "auto", height: "40px", cursor: "pointer" }}
+          src="src/assets/Icon_user.png"
+        />
+      </div>
     </HeaderWrapper>
   );
 }
+
+const Bubble = ({ text }: { text: string }) => {
+  return (
+    <BubbleWrapper>
+      <BubbleBox className="gummy">{text}</BubbleBox>
+      <img style={{ height: "14px" }} src="src/assets/bubble_tri.png" />
+    </BubbleWrapper>
+  );
+};
+
+const BubbleWrapper = styled.div`
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+`;
+
+const BubbleBox = styled.div`
+  width: fit-content;
+  height: 34px;
+
+  box-sizing: border-box;
+  padding: 0px 16px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 8px;
+
+  font-size: 15px;
+
+  color: white;
+  background-color: #584a54;
+`;
 
 const HeaderWrapper = styled.div`
   width: 100%;

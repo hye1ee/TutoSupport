@@ -18,9 +18,9 @@ interface ReplyData extends CommentData {
   isPinned: boolean;  // Flag for pinned replies
 }
 
-export const addComment = async (videoUrl: string, sectionId: string, commentData: CommentData) => {
+export const addComment = async (videoId: string, sectionId: string, commentData: CommentData) => {
   try {
-    const videoId = encodeURIComponent(videoUrl);
+    // const videoId = encodeURIComponent(videoId);
     const commentsRef = collection(db, 'videos', videoId, 'sections', sectionId, 'comments');
     const docRef = await addDoc(commentsRef, commentData);
     return docRef.id;
@@ -31,13 +31,13 @@ export const addComment = async (videoUrl: string, sectionId: string, commentDat
 };
 
 export const addReply = async (
-  videoUrl: string,
+  videoId: string,
   sectionId: string,
   commentId: string,
   replyData: ReplyData
 ) => {
   try {
-    const videoId = encodeURIComponent(videoUrl);
+    // const videoId = encodeURIComponent(videoId);
     const repliesRef = collection(
       db,
       'videos',
@@ -63,13 +63,13 @@ export const addReply = async (
 
 // New function to toggle pin status of a reply
 export const toggleReplyPin = async (
-  videoUrl: string,
+  videoId: string,
   sectionId: string,
   commentId: string,
   replyId: string
 ) => {
   try {
-    const videoId = encodeURIComponent(videoUrl);
+    // const videoId = encodeURIComponent(videoId);
     const replyRef = doc(
       db,
       'videos',
@@ -81,7 +81,7 @@ export const toggleReplyPin = async (
       'replies',
       replyId
     );
-    
+
     const replyDoc = await getDoc(replyRef);
     if (replyDoc.exists()) {
       const { isPinned } = replyDoc.data();
@@ -96,9 +96,9 @@ export const toggleReplyPin = async (
   }
 };
 
-export const getComments = async (videoUrl: string, sectionId: string) => {
+export const getComments = async (videoId: string, sectionId: string) => {
   try {
-    const videoId = encodeURIComponent(videoUrl);
+    // const videoId = encodeURIComponent(videoId);
     const commentsSnapshot = await getDocs(
       collection(db, 'videos', videoId, 'sections', sectionId, 'comments')
     );
@@ -140,16 +140,16 @@ export const getComments = async (videoUrl: string, sectionId: string) => {
 
 
 // Modify your existing clapComment function
-export const clapComment = async (videoUrl: string, sectionId: string, commentId: string) => {
+export const clapComment = async (videoId: string, sectionId: string, commentId: string) => {
   try {
-    const videoId = encodeURIComponent(videoUrl);
+    // const videoId = encodeURIComponent(videoId);
     const commentRef = doc(db, 'videos', videoId, 'sections', sectionId, 'comments', commentId);
     const commentDoc = await getDoc(commentRef);
-    
+
     if (commentDoc.exists()) {
       const { clap, userId } = commentDoc.data();
       await setDoc(commentRef, { clap: clap + 1 }, { merge: true });
-      
+
       // Create notification for the comment owner
       // Get current user ID from auth
       const currentUser = getCurrentUser();
@@ -172,13 +172,13 @@ export const clapComment = async (videoUrl: string, sectionId: string, commentId
 
 // Similarly modify clapReply function
 export const clapReply = async (
-  videoUrl: string,
+  videoId: string,
   sectionId: string,
   commentId: string,
   replyId: string
 ) => {
   try {
-    const videoId = encodeURIComponent(videoUrl);
+    // const videoId = encodeURIComponent(videoId);
     const replyRef = doc(
       db,
       'videos',
@@ -190,12 +190,12 @@ export const clapReply = async (
       'replies',
       replyId
     );
-    
+
     const replyDoc = await getDoc(replyRef);
     if (replyDoc.exists()) {
       const { clap, userId } = replyDoc.data();
       await setDoc(replyRef, { clap: clap + 1 }, { merge: true });
-      
+
       // Create notification for the reply owner
       const currentUser = getCurrentUser();
       if (currentUser && currentUser.uid !== userId) {
