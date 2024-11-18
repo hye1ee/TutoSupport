@@ -9,9 +9,9 @@ interface Props {
   onClick: () => void;
 }
 
-const StyledContainer = styled.div<{ small: boolean }>`
+const StyledContainer = styled.div<{ $small: boolean }>`
   ${(props) =>
-    props.small ? "height: 100%; width: auto;" : "width: 23%; height: auto;"}
+    props.$small ? "height: 100%; width: auto;" : "width: 23%; height: auto;"}
 
   aspect-ratio: 1 / 1; /* 1:1 비율 유지 */
 
@@ -69,7 +69,7 @@ const GalleryItem: React.FC<Props> = ({
   small,
 }) => {
   return (
-    <StyledContainer small={small ?? false}>
+    <StyledContainer $small={small ?? false}>
       <StyledImage src={url} alt="Clap Card Image" />
       <StyledClapButton
         onClicked={onClicked}

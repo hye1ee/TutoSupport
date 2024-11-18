@@ -29,8 +29,9 @@ export default function HallofFame() {
         </HeaderDescription>
       </BoardHeader>
       <BoardItemWrapper>
-        {items.map((item) => (
+        {items.map((item, index) => (
           <GalleryItem
+            key={index}
             url={item.url}
             value={item.clap}
             onClicked={false}

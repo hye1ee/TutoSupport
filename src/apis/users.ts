@@ -1,34 +1,42 @@
-import { doc, setDoc, getDoc } from 'firebase/firestore';
+import {
+  doc,
+  setDoc,
+  getDoc,
+  DocumentSnapshot,
+  DocumentData,
+} from "firebase/firestore";
 import { db } from "../config/firebase.ts";
 
-interface UserData {
+export interface UserDto {
   userId: string;
   email: string;
-  profilePicture: string;
+  profilePicture?: string;
 }
 
-export const createUser = async (userData: UserData) => {
+export const createUser = async (userData: UserDto) => {
   try {
     // Using setDoc with userId as document ID
-    await setDoc(doc(db, 'users', userData.userId), userData);
+    await setDoc(doc(db, "users", userData.userId), userData);
     return userData.userId;
   } catch (error) {
-    console.error('Error creating user:', error);
+    console.error("Error creating user:", error);
     throw error;
   }
 };
 
-
-export const getUser = async (userId: string) => {
+export const getUser = async (userId: string): Promise<UserDto> => {
   try {
-    const userDoc = await getDoc(doc(db, 'users', userId));
+    const userDoc = (await getDoc(
+      doc(db, "users", userId)
+    )) as DocumentSnapshot<UserDto, DocumentData>;
+
     if (userDoc.exists()) {
-      return { id: userDoc.id, ...userDoc.data() };
+      return { ...userDoc.data() };
     } else {
-      throw new Error('User not found');
+      throw new Error("User not found");
     }
   } catch (error) {
-    console.error('Error getting user:', error);
+    console.error("Error getting user:", error);
     throw error;
   }
 };

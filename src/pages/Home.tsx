@@ -93,9 +93,10 @@ export default function Home() {
     <PageWrapper>
       {video ? (
         <>
-          {video.map((el) => (
+          {video.map((el, index) => (
             <VideoThumbnail
               {...el}
+              key={index}
               onClick={() => navigate(`/watch/${el.id}`)}
             />
           ))}

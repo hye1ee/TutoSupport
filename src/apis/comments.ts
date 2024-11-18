@@ -1,31 +1,78 @@
 //apis/comments.ts
-import { collection, setDoc, addDoc, doc, getDoc, getDocs } from 'firebase/firestore';
+import {
+  collection,
+  setDoc,
+  addDoc,
+  doc,
+  getDoc,
+  getDocs,
+  DocumentData,
+  QuerySnapshot,
+  orderBy,
+  query,
+} from "firebase/firestore";
 import { db } from "../config/firebase.ts";
-import { getCurrentUser } from '../services/auth';
-import { createClapNotification } from '../services/notification';
+import { getCurrentUser } from "../services/auth";
+import { createClapNotification } from "../services/notification";
+import { getUser, UserDto } from "./users.ts";
 
-interface CommentData {
+export interface ThreadDto {
+  comment: CommentDto;
+  replies: ReplyDto[];
+  isReplyPinned: boolean;
+}
+
+export interface CommentDto {
+  id?: string;
+  user?: UserDto;
   content: string;
-  userId: string;
+  img?: string;
+  tag?: string; // Optional tag for the comment
   timestamp: Date;
   clap: number;
-  img?: string;
-  tag?: string;  // Optional tag for the comment
-  replies?: ReplyData[]; // Changed to ReplyData type
+  // clapped: boolean;
 }
 
-interface ReplyData extends CommentData {
-  isPinned: boolean;  // Flag for pinned replies
+export interface ExtendedCommentDto extends CommentDto {
+  userId: string;
 }
 
-export const addComment = async (videoId: string, sectionId: string, commentData: CommentData) => {
+export interface ReplyDto extends CommentDto {
+  isPinned: boolean; // Flag for pinned replies
+}
+
+export const handleAdd = async (
+  videoId: string,
+  sectionId: string,
+  commentData: ExtendedCommentDto,
+  parentCommentId?: string
+) => {
+  if (parentCommentId) {
+    return await addReply(videoId, sectionId, parentCommentId, commentData);
+  } else {
+    return await addComment(videoId, sectionId, commentData);
+  }
+};
+
+export const addComment = async (
+  videoId: string,
+  sectionId: string,
+  commentData: ExtendedCommentDto
+) => {
   try {
     // const videoId = encodeURIComponent(videoId);
-    const commentsRef = collection(db, 'videos', videoId, 'sections', sectionId, 'comments');
+    const commentsRef = collection(
+      db,
+      "videos",
+      videoId,
+      "sections",
+      sectionId,
+      "comments"
+    );
     const docRef = await addDoc(commentsRef, commentData);
     return docRef.id;
   } catch (error) {
-    console.error('Error adding comment:', error);
+    console.error("Error adding comment:", error);
     throw error;
   }
 };
@@ -34,29 +81,29 @@ export const addReply = async (
   videoId: string,
   sectionId: string,
   commentId: string,
-  replyData: ReplyData
+  replyData: CommentDto
 ) => {
   try {
     // const videoId = encodeURIComponent(videoId);
     const repliesRef = collection(
       db,
-      'videos',
+      "videos",
       videoId,
-      'sections',
+      "sections",
       sectionId,
-      'comments',
+      "comments",
       commentId,
-      'replies'
+      "replies"
     );
     // Ensure isPinned is set to false by default
-    const replyWithDefaults = {
+    const replyWithDefaults: ReplyDto = {
       ...replyData,
-      isPinned: replyData.isPinned || false
+      isPinned: false,
     };
     const docRef = await addDoc(repliesRef, replyWithDefaults);
     return docRef.id;
   } catch (error) {
-    console.error('Error adding reply:', error);
+    console.error("Error adding reply:", error);
     throw error;
   }
 };
@@ -72,13 +119,13 @@ export const toggleReplyPin = async (
     // const videoId = encodeURIComponent(videoId);
     const replyRef = doc(
       db,
-      'videos',
+      "videos",
       videoId,
-      'sections',
+      "sections",
       sectionId,
-      'comments',
+      "comments",
       commentId,
-      'replies',
+      "replies",
       replyId
     );
 
@@ -88,62 +135,92 @@ export const toggleReplyPin = async (
       await setDoc(replyRef, { isPinned: !isPinned }, { merge: true });
       return !isPinned;
     } else {
-      throw new Error('Reply not found');
+      throw new Error("Reply not found");
     }
   } catch (error) {
-    console.error('Error toggling reply pin:', error);
+    console.error("Error toggling reply pin:", error);
     throw error;
   }
 };
 
-export const getComments = async (videoId: string, sectionId: string) => {
+export const getComments = async (
+  videoId: string,
+  sectionId: string
+): Promise<ThreadDto[]> => {
   try {
     // const videoId = encodeURIComponent(videoId);
-    const commentsSnapshot = await getDocs(
-      collection(db, 'videos', videoId, 'sections', sectionId, 'comments')
-    );
+    const commentsSnapshot = (await getDocs(
+      collection(db, "videos", videoId, "sections", sectionId, "comments")
+    )) as QuerySnapshot<ExtendedCommentDto, DocumentData>;
 
-    const commentsWithReplies = await Promise.all(
+    const threads = await Promise.all(
       commentsSnapshot.docs.map(async (doc) => {
-        const repliesSnapshot = await getDocs(
-          collection(db, 'videos', videoId, 'sections', sectionId, 'comments', doc.id, 'replies')
-        );
+        const repliesSnapshot = (await getDocs(
+          query(
+            collection(
+              db,
+              "videos",
+              videoId,
+              "sections",
+              sectionId,
+              "comments",
+              doc.id,
+              "replies"
+            ),
+            orderBy("timestamp")
+          )
+        )) as QuerySnapshot<ReplyDto, DocumentData>;
+
+        // get user info for comments
+        const userData = await getUser(doc.data().userId);
 
         // Sort replies to show pinned replies first
-        const replies = repliesSnapshot.docs
-          .map(replyDoc => ({
-            id: replyDoc.id,
-            ...replyDoc.data()
-          }))
+        const replies: ReplyDto[] = repliesSnapshot.docs
+          .map((replyDoc) => {
+            return {
+              ...replyDoc.data(),
+            } as ReplyDto;
+          })
           .sort((a, b) => {
             // Sort by pinned status first (pinned replies come first)
             if (a.isPinned && !b.isPinned) return -1;
             if (!a.isPinned && b.isPinned) return 1;
             // Then sort by timestamp (newer first)
-            return b.timestamp - a.timestamp;
+            return Number(b.timestamp) - Number(a.timestamp);
           });
 
         return {
-          id: doc.id,
-          ...doc.data(),
-          replies: replies
-        };
+          comment: { ...doc.data(), user: userData },
+          replies: replies,
+          isReplyPinned: replies.length != 0 ? replies[0].isPinned : false,
+        } as ThreadDto;
       })
     );
 
-    return commentsWithReplies;
+    return threads;
   } catch (error) {
-    console.error('Error getting comments:', error);
+    console.error("Error getting comments:", error);
     throw error;
   }
 };
 
-
 // Modify your existing clapComment function
-export const clapComment = async (videoId: string, sectionId: string, commentId: string) => {
+export const clapComment = async (
+  videoId: string,
+  sectionId: string,
+  commentId: string
+) => {
   try {
     // const videoId = encodeURIComponent(videoId);
-    const commentRef = doc(db, 'videos', videoId, 'sections', sectionId, 'comments', commentId);
+    const commentRef = doc(
+      db,
+      "videos",
+      videoId,
+      "sections",
+      sectionId,
+      "comments",
+      commentId
+    );
     const commentDoc = await getDoc(commentRef);
 
     if (commentDoc.exists()) {
@@ -153,19 +230,20 @@ export const clapComment = async (videoId: string, sectionId: string, commentId:
       // Create notification for the comment owner
       // Get current user ID from auth
       const currentUser = getCurrentUser();
-      if (currentUser && currentUser.uid !== userId) {  // Don't notify if user claps their own comment
+      if (currentUser && currentUser.uid !== userId) {
+        // Don't notify if user claps their own comment
         await createClapNotification(
-          userId,              // Comment owner
-          currentUser.uid,     // User who clapped
+          userId, // Comment owner
+          currentUser.uid, // User who clapped
           commentId,
-          'comment'
+          "comment"
         );
       }
     } else {
-      throw new Error('Comment not found');
+      throw new Error("Comment not found");
     }
   } catch (error) {
-    console.error('Error clapping comment:', error);
+    console.error("Error clapping comment:", error);
     throw error;
   }
 };
@@ -181,13 +259,13 @@ export const clapReply = async (
     // const videoId = encodeURIComponent(videoId);
     const replyRef = doc(
       db,
-      'videos',
+      "videos",
       videoId,
-      'sections',
+      "sections",
       sectionId,
-      'comments',
+      "comments",
       commentId,
-      'replies',
+      "replies",
       replyId
     );
 
@@ -199,18 +277,13 @@ export const clapReply = async (
       // Create notification for the reply owner
       const currentUser = getCurrentUser();
       if (currentUser && currentUser.uid !== userId) {
-        await createClapNotification(
-          userId,
-          currentUser.uid,
-          replyId,
-          'reply'
-        );
+        await createClapNotification(userId, currentUser.uid, replyId, "reply");
       }
     } else {
-      throw new Error('Reply not found');
+      throw new Error("Reply not found");
     }
   } catch (error) {
-    console.error('Error clapping reply:', error);
+    console.error("Error clapping reply:", error);
     throw error;
   }
 };

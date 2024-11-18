@@ -33,9 +33,9 @@ export default function Gallery({ index }: { index: number }) {
       </GalleryHeader>
       <GalleryItemWrapper>
         <GalleryItemScroller>
-          {" "}
-          {items.map((item) => (
+          {items.map((item, index) => (
             <GalleryItem
+              key={index}
               small={true}
               url={item.url}
               value={item.clap}
