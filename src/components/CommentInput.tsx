@@ -5,7 +5,7 @@ import CustomInput from "./CustomInput";
 import { UploadRef } from "antd/es/upload/Upload";
 import RcUpload from "rc-upload";
 import {
-  CommentDto,
+  // CommentDto,
   ExtendedCommentDto,
   handleAdd,
   ReplyDto,
@@ -63,7 +63,7 @@ const CommentInput = forwardRef<CommentInputRef, Props>(
         videoId,
         sectionName,
         comment,
-        parentCommentId,
+        parentCommentId
       );
       if (result) {
         console.log(comment);
@@ -154,7 +154,7 @@ const CommentInput = forwardRef<CommentInputRef, Props>(
         )}
       </div>
     );
-  },
+  }
 );
 
 export default CommentInput;

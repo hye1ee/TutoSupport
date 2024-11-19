@@ -1,12 +1,12 @@
 import { useNavigate } from "react-router-dom";
 import { Avatar, Button, Flex, Image, Typography } from "antd";
-import { useEffect, useRef, useState } from "react";
+import { useRef, useState } from "react";
 import { ArrowDownIcon, ArrowUpIcon } from "../assets/arrow";
 import ClapButton from "./ClapButton";
 import CommentInput, { CommentInputRef } from "./CommentInput";
 import { CommentDto, ReplyDto } from "../apis/comments";
 
-const { Text, Link } = Typography;
+const { Text } = Typography;
 
 export default function Comment({
   videoId,

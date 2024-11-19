@@ -8,50 +8,49 @@ import CommonMistakes from "../components/CommonMistakes";
 import ReactPlayer from "react-player";
 import Gallery from "../components/Gallery";
 
-// TODO remove
-const sampleSections = [
-  { sectionName: "section1", startTime: 0, endTime: 1000 },
-  { sectionName: "section2", startTime: 1000, endTime: 2000 },
-  { sectionName: "section3", startTime: 2000, endTime: 2568 },
-];
+// const sampleSections = [
+//   { sectionName: "section1", startTime: 0, endTime: 1000 },
+//   { sectionName: "section2", startTime: 1000, endTime: 2000 },
+//   { sectionName: "section3", startTime: 2000, endTime: 2568 },
+// ];
 
-const threadsExample: ThreadDto[] = [
-  {
-    comment: {
-      id: "string",
-      user: { userId: "userid1", email: "user1" },
-      content: "comment1 content is like this",
-      clap: 30,
-      timestamp: new Date(),
-    },
-    replies: [
-      {
-        id: "string",
-        user: { userId: "userid1", email: "user1" },
-        content: "comment1sub content is like this",
-        clap: 30,
-        isPinned: true,
-        timestamp: new Date(),
-      },
-      {
-        id: "string",
-        user: { userId: "userid1", email: "user1" },
-        content: "comment1sub content is like this",
-        clap: 30,
-        isPinned: false,
-        timestamp: new Date(),
-      },
-    ],
-    isReplyPinned: true,
-  },
-];
+// const threadsExample: ThreadDto[] = [
+//   {
+//     comment: {
+//       id: "string",
+//       user: { userId: "userid1", email: "user1" },
+//       content: "comment1 content is like this",
+//       clap: 30,
+//       timestamp: new Date(),
+//     },
+//     replies: [
+//       {
+//         id: "string",
+//         user: { userId: "userid1", email: "user1" },
+//         content: "comment1sub content is like this",
+//         clap: 30,
+//         isPinned: true,
+//         timestamp: new Date(),
+//       },
+//       {
+//         id: "string",
+//         user: { userId: "userid1", email: "user1" },
+//         content: "comment1sub content is like this",
+//         clap: 30,
+//         isPinned: false,
+//         timestamp: new Date(),
+//       },
+//     ],
+//     isReplyPinned: true,
+//   },
+// ];
 
-import { Button, Flex } from "antd";
+import { Flex } from "antd";
 import CommentInput from "../components/CommentInput";
 import Thread from "../components/Thread";
 import { getComments, ReplyDto, ThreadDto } from "../apis/comments";
-import { addSection, getSections, SectionData } from "../apis/sections";
-import { createUser } from "../apis/users";
+import { getSections, SectionData } from "../apis/sections";
+// import { createUser } from "../apis/users";
 import TagButton from "../components/TagButton";
 
 export default function Watch() {
@@ -70,7 +69,7 @@ export default function Watch() {
   const [sections, setSections] = useState<SectionData[]>([]);
   const getSectionIdx = (time: number) => {
     return sections.findIndex(
-      (section) => time >= section.startTime && time < section.endTime,
+      (section) => time >= section.startTime && time < section.endTime
     );
   };
   const updateSection = (playedTime: number) => {
@@ -96,19 +95,19 @@ export default function Watch() {
     };
     setThreads((prevThreads) => [thread, ...prevThreads]);
   };
-  const insertSubComment = (parentCommentId: string, newReply: ReplyDto) => {
-    // TODO
-    setThreads((prevThreads) =>
-      prevThreads.map((thread) =>
-        thread.comment.id === parentCommentId
-          ? {
-              ...thread,
-              replies: [newReply, ...thread.replies],
-            }
-          : thread,
-      ),
-    );
-  };
+  // const insertSubComment = (parentCommentId: string, newReply: ReplyDto) => {
+  //   // TODO
+  //   setThreads((prevThreads) =>
+  //     prevThreads.map((thread) =>
+  //       thread.comment.id === parentCommentId
+  //         ? {
+  //             ...thread,
+  //             replies: [newReply, ...thread.replies],
+  //           }
+  //         : thread,
+  //     ),
+  //   );
+  // };
 
   useEffect(() => {
     if (watchId === undefined) navigate("/");
@@ -148,7 +147,7 @@ export default function Watch() {
       if (sectionIdx > -1) {
         const comments = await getComments(
           watchId,
-          sections[sectionIdx].sectionName,
+          sections[sectionIdx].sectionName
         );
         console.log("comments update");
         console.log(comments);
