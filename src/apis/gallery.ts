@@ -1,12 +1,15 @@
 // apis/gallery.ts
-import { collection, doc, setDoc, getDocs, query, where } from 'firebase/firestore';
+import { collection, doc, setDoc, getDocs, getDoc, where } from 'firebase/firestore';
 import { db } from "../config/firebase";
+import { createClapNotification } from '../services/notification';
+import { getCurrentUser } from '../services/auth';
 
 export interface GalleryImage {
   id?: string;
   userId: string;
   imageUrl: string;
   timestamp: Date;
+  clap: number;
 }
 
 // Add an image to a section's gallery
@@ -57,6 +60,36 @@ export const getGalleryImages = async (
     }));
   } catch (error) {
     console.error('Error getting gallery images:', error);
+    throw error;
+  }
+};
+
+export const clapGalleryImage = async (
+  videoId: string,
+  sectionId: string,
+  imageUserId: string  // This is the ID of the image document
+) => {
+  try {
+    const imageRef = doc(db, 'videos', videoId, 'sections', sectionId, 'gallery', imageUserId);
+    const imageDoc = await getDoc(imageRef);
+    
+    if (imageDoc.exists()) {
+      const { clap } = imageDoc.data();
+      await setDoc(imageRef, { clap: (clap || 0) + 1 }, { merge: true });
+      
+      // Create notification
+      const currentUser = getCurrentUser();
+      if (currentUser && currentUser.uid !== imageUserId) {
+        await createClapNotification(
+          imageUserId,        // image owner
+          currentUser.uid,    // who clapped
+          imageUserId,        // image id
+          'gallery'           // new content type
+        );
+      }
+    }
+  } catch (error) {
+    console.error('Error clapping gallery image:', error);
     throw error;
   }
 };

@@ -1,37 +1,49 @@
 // services/auth.ts
-import { signInWithPopup, signOut } from 'firebase/auth';
-import { auth, googleProvider } from '../config/firebase';
-import { createUser } from '../apis/users'; // We'll use your existing user service
+import { 
+  GoogleAuthProvider, 
+  signInWithPopup, 
+  signOut, 
+  onAuthStateChanged 
+} from 'firebase/auth';
+import { auth } from '../config/firebase';
+
+export const googleProvider = new GoogleAuthProvider();
 
 export const signInWithGoogle = async () => {
   try {
+    console.log('Starting Google sign in...');
+    console.log('Auth instance:', !!auth); // Check if auth is initialized
+    console.log('Google provider:', !!googleProvider); // Check if provider exists
+    
     const result = await signInWithPopup(auth, googleProvider);
-    const user = result.user;
-
-    // Create/update user in Firestore using your existing createUser function
-    await createUser({
-      userId: user.uid,
-      email: user.email || '',
-      profilePicture: user.photoURL || ''
+    console.log('Sign in successful:', result.user);
+    return result.user;
+  } catch (error: any) {
+    console.error('Detailed error:', {
+      code: error.code,
+      message: error.message,
+      details: error
     });
-
-    return user;
-  } catch (error) {
-    console.error('Error signing in with Google:', error);
     throw error;
   }
 };
-
 export const logOut = async () => {
   try {
     await signOut(auth);
+    console.log("Sign out successful");
   } catch (error) {
     console.error('Error signing out:', error);
     throw error;
   }
 };
 
-// Helper function to get current user
 export const getCurrentUser = () => {
-  return auth.currentUser;
+  const user = auth.currentUser;
+  console.log('Current user:', user);
+  return user;
+};
+
+
+export const onAuthStateChange = (callback: (user: any) => void) => {
+  return onAuthStateChanged(auth, callback);
 };

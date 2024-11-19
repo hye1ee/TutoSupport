@@ -7,7 +7,7 @@ interface Notification {
   type: 'clap';           // We can add more types later
   sourceUserId: string;    // User who performed the action (e.g., who clapped)
   contentId: string;       // ID of the comment/reply that was clapped
-  contentType: 'comment' | 'reply';  // Type of content that was clapped
+  contentType: 'comment' | 'reply' | 'gallery';   // Type of content that was clapped
   timestamp: Date;
   isRead: boolean;
 }
