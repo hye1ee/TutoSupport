@@ -41,7 +41,7 @@ export const getVideoById = async (videoId: string): Promise<VideoData> => {
   try {
     const videoDoc = await getDoc(doc(db, "videos", videoId));
     if (videoDoc.exists()) {
-      return { id: videoDoc.id, ...videoDoc.data() };
+      return { id: videoDoc.id, ...videoDoc.data() } as VideoData;
     } else {
       throw new Error("Video not found");
     }

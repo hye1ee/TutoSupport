@@ -3,7 +3,6 @@ import { BiX } from "react-icons/bi";
 import { FiFilePlus } from "react-icons/fi";
 import styled from "styled-components";
 import { uploadImage } from "../apis/images";
-import { getCurrentUser } from "../services/auth";
 import { addGalleryImage } from "../apis/gallery";
 
 interface GalleryUploadModalProps {

@@ -10,22 +10,6 @@ import {
 import GalleryUploadModal from "./GalleryUploadModal";
 import { getCurrentUser } from "../services/auth";
 
-const items = [
-  { url: "/images/Icon_img.png", clap: 100 },
-  { url: "/images/Icon_img.png", clap: 100 },
-  { url: "/images/Icon_img.png", clap: 100 },
-  { url: "/images/Icon_img.png", clap: 100 },
-  { url: "/images/Icon_img.png", clap: 100 },
-  { url: "/images/Icon_img.png", clap: 100 },
-  { url: "/images/Icon_img.png", clap: 100 },
-  { url: "/images/Icon_img.png", clap: 100 },
-  { url: "/images/Icon_img.png", clap: 100 },
-  { url: "/images/Icon_img.png", clap: 100 },
-  { url: "/images/Icon_img.png", clap: 100 },
-  { url: "/images/Icon_img.png", clap: 100 },
-  { url: "/images/Icon_img.png", clap: 100 },
-];
-
 export default function Gallery({
   index,
   videoId,
