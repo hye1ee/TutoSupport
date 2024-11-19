@@ -9,7 +9,7 @@ export default function Header() {
     <HeaderWrapper>
       <img
         style={{ width: "auto", height: "36px", cursor: "pointer" }}
-        src="src/assets/Icon_logo.png"
+        src="/images/Icon_logo.png"
         onClick={() => navigate("/")}
       />
       <div style={{ display: "flex", flexDirection: "row", gap: "4px" }}>
@@ -17,7 +17,7 @@ export default function Header() {
         <img
           onClick={signInWithGoogle}
           style={{ width: "auto", height: "40px", cursor: "pointer" }}
-          src="src/assets/Icon_user.png"
+          src="/images/Icon_user.png"
         />
       </div>
     </HeaderWrapper>
@@ -28,7 +28,7 @@ const Bubble = ({ text }: { text: string }) => {
   return (
     <BubbleWrapper>
       <BubbleBox className="gummy">{text}</BubbleBox>
-      <img style={{ height: "14px" }} src="src/assets/bubble_tri.png" />
+      <img style={{ height: "14px" }} src="/images/bubble_tri.png" />
     </BubbleWrapper>
   );
 };

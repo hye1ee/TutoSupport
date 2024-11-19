@@ -11,7 +11,7 @@ export default function VideoThumbnail(props: Props) {
       <VideoClap>
         <img
           style={{ width: "22px", height: "22px" }}
-          src="src/assets/Icon_clap.png"
+          src="/images/Icon_clap.png"
         />
         {`${props.clap}`}
       </VideoClap>

@@ -78,9 +78,7 @@ const GalleryItem: React.FC<Props> = ({
         <img
           style={{ width: "24px", height: "24px", objectFit: "cover" }}
           src={
-            onClicked
-              ? "/src/assets/Icon_clap_white.png"
-              : "/src/assets/Icon_clap.png"
+            onClicked ? "/images/Icon_clap_white.png" : "/images/Icon_clap.png"
           }
         />
         {value}

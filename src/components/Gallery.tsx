@@ -3,19 +3,19 @@ import GalleryItem from "./GalleryItem";
 import { BiPlus } from "react-icons/bi";
 
 const items = [
-  { url: "/src/assets/Icon_img.png", clap: 100 },
-  { url: "/src/assets/Icon_img.png", clap: 100 },
-  { url: "/src/assets/Icon_img.png", clap: 100 },
-  { url: "/src/assets/Icon_img.png", clap: 100 },
-  { url: "/src/assets/Icon_img.png", clap: 100 },
-  { url: "/src/assets/Icon_img.png", clap: 100 },
-  { url: "/src/assets/Icon_img.png", clap: 100 },
-  { url: "/src/assets/Icon_img.png", clap: 100 },
-  { url: "/src/assets/Icon_img.png", clap: 100 },
-  { url: "/src/assets/Icon_img.png", clap: 100 },
-  { url: "/src/assets/Icon_img.png", clap: 100 },
-  { url: "/src/assets/Icon_img.png", clap: 100 },
-  { url: "/src/assets/Icon_img.png", clap: 100 },
+  { url: "/images/Icon_img.png", clap: 100 },
+  { url: "/images/Icon_img.png", clap: 100 },
+  { url: "/images/Icon_img.png", clap: 100 },
+  { url: "/images/Icon_img.png", clap: 100 },
+  { url: "/images/Icon_img.png", clap: 100 },
+  { url: "/images/Icon_img.png", clap: 100 },
+  { url: "/images/Icon_img.png", clap: 100 },
+  { url: "/images/Icon_img.png", clap: 100 },
+  { url: "/images/Icon_img.png", clap: 100 },
+  { url: "/images/Icon_img.png", clap: 100 },
+  { url: "/images/Icon_img.png", clap: 100 },
+  { url: "/images/Icon_img.png", clap: 100 },
+  { url: "/images/Icon_img.png", clap: 100 },
 ];
 
 export default function Gallery({ index }: { index: number }) {

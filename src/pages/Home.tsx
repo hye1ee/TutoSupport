@@ -35,7 +35,7 @@ export default function Home() {
             \n♡ jewelry pliers and cutters (if needed)
 
             \n\nDo not distribute this pattern for monetary gain, and if you make this top please be sure to credit me.`,
-          id: "MSxApiT_WK4",
+          id: "MvPdE27Otig",
           title: "buffy charm top: a freehand knitting tutorial",
           userId: "2",
           videoUrl: "https://www.youtube.com/watch?v=64C1NLfPFLM",

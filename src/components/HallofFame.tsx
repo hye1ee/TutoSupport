@@ -3,19 +3,19 @@ import GalleryItem from "./GalleryItem";
 
 export default function HallofFame() {
   const items = [
-    { url: "/src/assets/Icon_img.png", clap: 100 },
-    { url: "/src/assets/Icon_img.png", clap: 100 },
-    { url: "/src/assets/Icon_img.png", clap: 100 },
-    { url: "/src/assets/Icon_img.png", clap: 100 },
-    { url: "/src/assets/Icon_img.png", clap: 100 },
-    { url: "/src/assets/Icon_img.png", clap: 100 },
-    { url: "/src/assets/Icon_img.png", clap: 100 },
-    { url: "/src/assets/Icon_img.png", clap: 100 },
-    { url: "/src/assets/Icon_img.png", clap: 100 },
-    { url: "/src/assets/Icon_img.png", clap: 100 },
-    { url: "/src/assets/Icon_img.png", clap: 100 },
-    { url: "/src/assets/Icon_img.png", clap: 100 },
-    { url: "/src/assets/Icon_img.png", clap: 100 },
+    { url: "/images/Icon_img.png", clap: 100 },
+    { url: "/images/Icon_img.png", clap: 100 },
+    { url: "/images/Icon_img.png", clap: 100 },
+    { url: "/images/Icon_img.png", clap: 100 },
+    { url: "/images/Icon_img.png", clap: 100 },
+    { url: "/images/Icon_img.png", clap: 100 },
+    { url: "/images/Icon_img.png", clap: 100 },
+    { url: "/images/Icon_img.png", clap: 100 },
+    { url: "/images/Icon_img.png", clap: 100 },
+    { url: "/images/Icon_img.png", clap: 100 },
+    { url: "/images/Icon_img.png", clap: 100 },
+    { url: "/images/Icon_img.png", clap: 100 },
+    { url: "/images/Icon_img.png", clap: 100 },
   ];
 
   return (
