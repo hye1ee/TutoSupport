@@ -190,7 +190,7 @@ export const getComments = async (
           });
 
         return {
-          comment: { ...doc.data(), user: userData },
+          comment: { ...doc.data(), id: doc.id, user: userData }, // Add id: doc.id here
           replies: replies,
           isReplyPinned: replies.length != 0 ? replies[0].isPinned : false,
         } as ThreadDto;
