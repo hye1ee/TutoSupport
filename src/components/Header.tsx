@@ -1,9 +1,26 @@
 import { useNavigate } from "react-router-dom";
 import styled from "styled-components";
-import { signInWithGoogle } from "../services/auth";
+import { getCurrentUser, logOut, signInWithGoogle } from "../services/auth";
+import { useEffect, useState } from "react";
+
+interface UserInfo {
+  name: string;
+  profile: string | null;
+}
 
 export default function Header() {
   const navigate = useNavigate();
+  const [user, setUser] = useState<UserInfo | null>(null);
+
+  useEffect(() => {
+    const prevUser = getCurrentUser();
+    console.log("prevUser", prevUser);
+    if (prevUser) {
+      const name = prevUser.displayName;
+      if (!name) logOut();
+      else setUser({ name, profile: prevUser.photoURL });
+    }
+  }, []);
 
   return (
     <HeaderWrapper>
@@ -12,13 +29,45 @@ export default function Header() {
         src="/images/Icon_logo.png"
         onClick={() => navigate("/")}
       />
-      <div style={{ display: "flex", flexDirection: "row", gap: "4px" }}>
-        <Bubble text="Please Login First!" />
-        <img
-          onClick={signInWithGoogle}
-          style={{ width: "auto", height: "40px", cursor: "pointer" }}
-          src="/images/Icon_user.png"
+      <div
+        style={{
+          display: "flex",
+          flexDirection: "row",
+          gap: "8px",
+          alignItems: "center",
+        }}
+      >
+        <Bubble
+          text={user ? `Welcome back, ${user.name}` : "Please Login First!"}
         />
+        <img
+          style={{ width: "auto", height: "40px" }}
+          src={user?.profile ?? "/images/Icon_user.png"}
+        />
+        <BubbleBox
+          style={{
+            cursor: "pointer",
+            marginLeft: "12px",
+            backgroundColor: "#9D5C63",
+            fontWeight: "bold",
+          }}
+          onClick={() => {
+            if (user) {
+              logOut();
+              setUser(null);
+            } else
+              signInWithGoogle().then((newUser) => {
+                if (newUser.displayName) {
+                  setUser({
+                    name: newUser.displayName,
+                    profile: newUser.photoURL,
+                  });
+                }
+              });
+          }}
+        >
+          {user ? "Logout" : "Login"}
+        </BubbleBox>
       </div>
     </HeaderWrapper>
   );
