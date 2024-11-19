@@ -1,6 +1,14 @@
 import styled from "styled-components";
 import GalleryItem from "./GalleryItem";
 import { BiPlus } from "react-icons/bi";
+import { useEffect, useState } from "react";
+import {
+  clapGalleryImage,
+  GalleryImage,
+  getGalleryImages,
+} from "../apis/gallery";
+import GalleryUploadModal from "./GalleryUploadModal";
+import { getCurrentUser } from "../services/auth";
 
 const items = [
   { url: "/images/Icon_img.png", clap: 100 },
@@ -18,31 +26,86 @@ const items = [
   { url: "/images/Icon_img.png", clap: 100 },
 ];
 
-export default function Gallery({ index }: { index: number }) {
+export default function Gallery({
+  index,
+  videoId,
+}: {
+  index: number;
+  videoId: string;
+}) {
+  const [images, setImages] = useState<GalleryImage[]>([]);
+  const [upload, setUpload] = useState<boolean>(false);
+  const [userId, setUserId] = useState<string | null>(null);
+
+  useEffect(() => {
+    console.log("image updated", images);
+  }, [images]);
+
+  useEffect(() => {
+    const asyncWrapper = async () => {
+      setImages(
+        (await getGalleryImages(
+          videoId,
+          (index + 1).toString()
+        )) as GalleryImage[]
+      );
+    };
+    asyncWrapper();
+  }, [index]);
+
+  const clapImage = (imageId: string) => () => {
+    clapGalleryImage(videoId, (index + 1).toString(), imageId);
+  };
+
+  const onUploadClick = async () => {
+    const user = await getCurrentUser();
+    if (user) {
+      setUserId(user.uid);
+      setUpload(true);
+    }
+  };
+
   return (
     <GalleryContainer>
+      {upload && userId && (
+        <GalleryUploadModal
+          videoId={videoId}
+          sectionId={(index + 1).toString()}
+          userId={userId}
+          onCancel={() => {
+            setUpload(false);
+            setUserId(null);
+          }}
+        />
+      )}
       <GalleryHeader>
         <GalleryTitle>{"Who is working on "}</GalleryTitle>
         <GalleryTitle style={{ color: "#9D5C63" }}>
           {"#" + (index + 1).toString()}
         </GalleryTitle>
         <GalleryTitle>{" right now?"}</GalleryTitle>
-        <GalleryAdd>
+        <GalleryAdd onClick={onUploadClick}>
           <BiPlus size={26} color="white" />
         </GalleryAdd>
       </GalleryHeader>
       <GalleryItemWrapper>
+        {images.length === 0 && (
+          <GalleryTitle>{`There is nobody yet,\nBe the first uploader!`}</GalleryTitle>
+        )}
         <GalleryItemScroller>
-          {items.map((item, index) => (
-            <GalleryItem
-              key={index}
-              small={true}
-              url={item.url}
-              value={item.clap}
-              onClicked={false}
-              onClick={() => {}}
-            />
-          ))}
+          {images.map(
+            (image, index) =>
+              image.id && (
+                <GalleryItem
+                  key={index}
+                  small={true}
+                  url={image.imageUrl}
+                  value={image.clap}
+                  onClicked={false}
+                  onClick={clapImage(image.id)}
+                />
+              )
+          )}
         </GalleryItemScroller>
       </GalleryItemWrapper>
     </GalleryContainer>

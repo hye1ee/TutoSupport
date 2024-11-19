@@ -8,43 +8,6 @@ import CommonMistakes from "../components/CommonMistakes";
 import ReactPlayer from "react-player";
 import Gallery from "../components/Gallery";
 
-// const sampleSections = [
-//   { sectionName: "section1", startTime: 0, endTime: 1000 },
-//   { sectionName: "section2", startTime: 1000, endTime: 2000 },
-//   { sectionName: "section3", startTime: 2000, endTime: 2568 },
-// ];
-
-// const threadsExample: ThreadDto[] = [
-//   {
-//     comment: {
-//       id: "string",
-//       user: { userId: "userid1", email: "user1" },
-//       content: "comment1 content is like this",
-//       clap: 30,
-//       timestamp: new Date(),
-//     },
-//     replies: [
-//       {
-//         id: "string",
-//         user: { userId: "userid1", email: "user1" },
-//         content: "comment1sub content is like this",
-//         clap: 30,
-//         isPinned: true,
-//         timestamp: new Date(),
-//       },
-//       {
-//         id: "string",
-//         user: { userId: "userid1", email: "user1" },
-//         content: "comment1sub content is like this",
-//         clap: 30,
-//         isPinned: false,
-//         timestamp: new Date(),
-//       },
-//     ],
-//     isReplyPinned: true,
-//   },
-// ];
-
 import { Flex } from "antd";
 import CommentInput from "../components/CommentInput";
 import Thread from "../components/Thread";
@@ -52,8 +15,13 @@ import { getComments, ReplyDto, ThreadDto } from "../apis/comments";
 import { getSections, SectionData } from "../apis/sections";
 // import { createUser } from "../apis/users";
 import TagButton from "../components/TagButton";
+import { getVideoById, VideoData } from "../apis/videos";
 
 export default function Watch() {
+  const videoId = useParams().watchId as string;
+  const navigate = useNavigate();
+
+  // [1] for video interaction
   const [time, setTime] = useState<number>(0);
   const [duration, setDuration] = useState<number>(0);
   const [isSeeking, setIsSeeking] = useState<boolean>(false);
@@ -62,11 +30,11 @@ export default function Watch() {
 
   const playerRef = useRef<ReactPlayer>(null);
 
-  const watchId = useParams().watchId as string;
-  const navigate = useNavigate();
-
+  // [2] for sections
   const [sectionIdx, setSectionIdx] = useState(-1);
   const [sections, setSections] = useState<SectionData[]>([]);
+  const [video, setVideo] = useState<VideoData>();
+
   const getSectionIdx = (time: number) => {
     return sections.findIndex(
       (section) => time >= section.startTime && time < section.endTime
@@ -77,6 +45,7 @@ export default function Watch() {
     setSectionIdx(idx);
   };
 
+  // [3] for comments
   const [selectedTag, setSelectedTag] = useState<string | null>(null);
   const handleTagClick = (tag: string) => {
     if (tag == selectedTag) setSelectedTag(null);
@@ -110,7 +79,7 @@ export default function Watch() {
   // };
 
   useEffect(() => {
-    if (watchId === undefined) navigate("/");
+    if (videoId === undefined) navigate("/");
     document.addEventListener("keydown", keyEventHandler);
 
     fetchSections();
@@ -121,13 +90,14 @@ export default function Watch() {
 
     async function fetchSections() {
       // TODO remove, this is for setting
-      // await addSection(watchId, sampleSections[0]);
-      // await addSection(watchId, sampleSections[1]);
-      // await addSection(watchId, sampleSections[2]);
+      // await addSection(videoId, sampleSections[0]);
+      // await addSection(videoId, sampleSections[1]);
+      // await addSection(videoId, sampleSections[2]);
       // const userId = await createUser({ userId: "1", email: "email" });
       // console.log(userId);
-
-      const sections = await getSections(watchId);
+      setVideo((await getVideoById(videoId)) as VideoData);
+      const sections = await getSections(videoId);
+      console.log("sections", sections);
       const uniqueSections = sections
         .filter((section, index, self) => {
           return (
@@ -146,7 +116,7 @@ export default function Watch() {
 
       if (sectionIdx > -1) {
         const comments = await getComments(
-          watchId,
+          videoId,
           sections[sectionIdx].sectionName
         );
         console.log("comments update");
@@ -156,7 +126,7 @@ export default function Watch() {
       }
     }
     fetchComments();
-  }, [watchId, sections, sectionIdx]);
+  }, [videoId, sections, sectionIdx]);
 
   // when user moves timeline handle
   useEffect(() => {
@@ -223,7 +193,7 @@ export default function Watch() {
               <Video
                 playerRef={playerRef}
                 play={isPlay}
-                id={watchId}
+                id={videoId}
                 onDuration={onDuration}
                 onProgress={onProgress}
               />
@@ -242,12 +212,12 @@ export default function Watch() {
         {time == 0 ? (
           <DescriptionContainer>
             <div style={{ fontSize: "22px", fontWeight: "700" }}>
-              {"buffy charm top: a freehand knitting tutorial"}
+              {video?.title}
             </div>
-            <div> {"video description"}</div>
+            <div> {video?.description}</div>
           </DescriptionContainer>
         ) : (
-          <Gallery index={getSectionIdx(time)} />
+          <Gallery videoId={videoId} index={getSectionIdx(time)} />
         )}
       </VideoWrapper>
 
@@ -275,14 +245,14 @@ export default function Watch() {
           />
         </Flex>
         <CommentInput
-          videoId={watchId}
+          videoId={videoId}
           sectionName={sectionIdx > -1 ? sections[sectionIdx].sectionName : ""}
           parentHandleComment={handleThread}
         />
         {filteredThreads.map((thread, index) => (
           <Thread
             key={index}
-            videoId={watchId}
+            videoId={videoId}
             sectionName={
               sectionIdx > -1 ? sections[sectionIdx].sectionName : ""
             }
