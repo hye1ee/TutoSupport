@@ -22,7 +22,7 @@ export default function CommonMistakes(props: CommonMistakesProps) {
           Stuck? You might have made the following mistakes
         </div>
 
-        <Mistake
+        {/* <Mistake
           mistake="dfd dfd dfd dfd dfd dfd dfd dfd dfd dfd dfd dfd dfd dfd dfd dfd dfd
             dfd dfd dfd dfd dfd dfd dfd dfd dfd dfd dfd dfd dfd dfd dfd dfd dfd
             dfd dfd dfd dfd dfd dfd dfd dfd dfd"
@@ -30,10 +30,17 @@ export default function CommonMistakes(props: CommonMistakesProps) {
             dfd dfd dfd dfd dfd dfd dfd dfd dfd dfd dfd dfd dfd dfd dfd dfd dfd
             dfd dfd dfd dfd dfd dfd dfd dfd dfd"
           clap={284}
-        />
+        /> */}
 
         {props.threads.map((thread) => (
-          <div>{thread.comment.content}</div>
+          <Mistake
+            mistake={thread.comment.content}
+            solution={
+              thread.replies.filter((reply) => reply.isPinned)[0].content
+            }
+            imgUrl={thread.comment.img}
+            clap={284}
+          />
         ))}
       </BoardBody>
     </BoardWrapper>
@@ -62,15 +69,18 @@ const Mistake = ({
 
   return (
     <MistakeWrapper>
-      <img
-        style={{
-          height: "100%",
-          aspectRatio: 1 / 1,
-          width: "auto",
-          objectFit: "cover",
-        }}
-        src={imgUrl ?? "/images/Icon_img.png"}
-      />
+      {imgUrl && imgUrl.length > 0 && (
+        <img
+          style={{
+            height: "100%",
+            aspectRatio: 1 / 1,
+            width: "auto",
+            objectFit: "cover",
+          }}
+          src={imgUrl ?? "/images/Icon_img.png"}
+        />
+      )}
+
       <div
         style={{
           flex: 1,
