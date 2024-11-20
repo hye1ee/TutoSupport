@@ -47,20 +47,23 @@ export default function Gallery({
     return () => unsubscribe();
   }, [sectionId]);
 
-  // useEffect(() => {
-  //   // when images are updated, update claps too
-  //   const asyncWrapper = async () => {
-  //     const promises = images.map(async (img) => {
-  //       const response = await getGalleryClappedUsers(
-  //         videoId,
-  //         sectionId,
-  //         img.userId
-  //       ); // API 호출
-  //       return response; // 반환값
-  //     });
-  //   };
-  //   asyncWrapper();
-  // }, [images]);
+  useEffect(() => {
+    // when images are updated, update claps too
+    const asyncWrapper = async () => {
+      const user = getCurrentUser();
+      if (!user) return;
+      const promises = images.map(async (img) => {
+        const response = await getGalleryClappedUsers(
+          videoId,
+          sectionId,
+          img.userId
+        );
+        return response.includes(user.uid); // 반환값
+      });
+      setClaps((await Promise.all(promises)) as boolean[]);
+    };
+    asyncWrapper();
+  }, [images]);
 
   useEffect(() => {
     const asyncWrapper = async () => {
@@ -150,7 +153,7 @@ export default function Gallery({
                   small={true}
                   url={image.imageUrl}
                   value={image.clap}
-                  onClicked={false}
+                  onClicked={claps ? claps[index] : false}
                   onClick={clapImage(image.id)}
                 />
               )

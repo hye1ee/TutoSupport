@@ -9,15 +9,7 @@ import { getComments, ReplyDto, ThreadDto } from "../apis/comments";
 import { getSections, SectionData } from "../apis/sections";
 import { getVideoById, VideoData } from "../apis/videos";
 import { db } from "../config/firebase";
-import {
-  collection,
-  collectionGroup,
-  doc,
-  onSnapshot,
-  query,
-  Unsubscribe,
-  where,
-} from "firebase/firestore";
+import { collection, doc, onSnapshot } from "firebase/firestore";
 
 import Timeline from "../components/Timeline";
 import Video from "../components/Video";
@@ -354,7 +346,7 @@ const VideoWrapper = styled.div`
   flex: 3;
   height: 100%;
   max-height: 100%;
-  overflow: hidden;
+  /* overflow: hidden; */
 
   padding: 0px 16px;
   border-right: 1px solid gray;

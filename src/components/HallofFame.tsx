@@ -4,20 +4,40 @@ import { useEffect, useState } from "react";
 import {
   clapGalleryImage,
   GalleryImage,
+  getGalleryClappedUsers,
   getGalleryImages,
 } from "../apis/gallery";
 import { HashLoader } from "react-spinners";
 import { collection, onSnapshot } from "firebase/firestore";
 import { db } from "../config/firebase";
+import { getCurrentUser } from "../services/auth";
 
 interface HallofFameProps {
   videoId: string;
   sectionId: string;
-  userId?: string;
 }
 
 export default function HallofFame(props: HallofFameProps) {
   const [images, setImages] = useState<GalleryImage[]>([]);
+  const [claps, setClaps] = useState<boolean[]>();
+
+  useEffect(() => {
+    // when images are updated, update claps too
+    const asyncWrapper = async () => {
+      const user = getCurrentUser();
+      if (!user) return;
+      const promises = images.map(async (img) => {
+        const response = await getGalleryClappedUsers(
+          props.videoId,
+          props.sectionId,
+          img.userId
+        );
+        return response.includes(user.uid); // 반환값
+      });
+      setClaps((await Promise.all(promises)) as boolean[]);
+    };
+    asyncWrapper();
+  }, [images]);
 
   // track hall of fame images
   useEffect(() => {
@@ -73,7 +93,7 @@ export default function HallofFame(props: HallofFameProps) {
             key={index}
             url={image.imageUrl}
             value={image.clap}
-            onClicked={false}
+            onClicked={claps ? claps[index] : false}
             onClick={onItemClick(image.userId)}
           />
         ))}

@@ -114,13 +114,13 @@ export const getGalleryClappedUsers = async (
   videoId: string,
   sectionId: string,
   imageUserId: string,
-): Promise<UserDto[]> => {
+): Promise<string[]> => {
   const imageDoc = await getDoc(
     doc(db, "videos", videoId, "sections", sectionId, "gallery", imageUserId),
   );
   const clappedByIds = imageDoc.data()?.clappedBy || [];
-  const users = await Promise.all(
-    clappedByIds.map((id: string) => getUser(id)),
-  );
-  return users;
+  // const users = await Promise.all(
+  //   clappedByIds.map((id: string) => getUser(id)),
+  // );
+  return clappedByIds;
 };
