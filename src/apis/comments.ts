@@ -30,6 +30,7 @@ export interface CommentDto {
   tag?: string; // Optional tag for the comment
   timestamp: Date;
   clap: number;
+  clappedBy: string[];
   // clapped: boolean;
 }
 
@@ -230,6 +231,13 @@ export const clapComment = async (
       // Create notification for the comment owner
       // Get current user ID from auth
       const currentUser = getCurrentUser();
+
+      if (currentUser && !clappedBy.includes(currentUser.uid)) {
+        await setDoc(commentRef, { 
+          clap: clap + 1,
+          clappedBy: [...clappedBy, currentUser.uid]
+        }, { merge: true });}
+      
       if (currentUser && currentUser.uid !== userId) {
         // Don't notify if user claps their own comment
         await createClapNotification(
@@ -276,6 +284,16 @@ export const clapReply = async (
 
       // Create notification for the reply owner
       const currentUser = getCurrentUser();
+
+      if (currentUser && !clappedBy.includes(currentUser.uid)) {
+        await setDoc(replyRef, { 
+          clap: clap + 1,
+          clappedBy: [...clappedBy, currentUser.uid]
+        }, { merge: true });}
+
+
+
+
       if (currentUser && currentUser.uid !== userId) {
         await createClapNotification(userId, currentUser.uid, replyId, "reply");
       }
@@ -286,4 +304,12 @@ export const clapReply = async (
     console.error("Error clapping reply:", error);
     throw error;
   }
+};
+
+
+export const getClappedUsers = async (commentId: string): Promise<UserDto[]> => {
+  const commentDoc = await getDoc(doc(db, "comments", commentId));
+  const clappedByIds = commentDoc.data()?.clappedBy || [];
+  const users = await Promise.all(clappedByIds.map(id => getUser(id)));
+  return users;
 };
