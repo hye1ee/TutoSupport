@@ -1,5 +1,6 @@
 import React from "react";
 import styled from "styled-components";
+import { getCurrentUser } from "../services/auth";
 
 interface Props {
   small?: boolean;
@@ -68,13 +69,16 @@ const GalleryItem: React.FC<Props> = ({
   onClick,
   small,
 }) => {
+  const onClap = () => {
+    const user = getCurrentUser();
+    if (!user) window.alert("Please login first");
+    else if (!onClicked) onClick();
+  };
+
   return (
     <StyledContainer $small={small ?? false}>
       <StyledImage src={url} alt="Clap Card Image" />
-      <StyledClapButton
-        onClicked={onClicked}
-        onClick={!onClicked ? onClick : undefined}
-      >
+      <StyledClapButton onClicked={onClicked} onClick={onClap}>
         <img
           style={{ width: "24px", height: "24px", objectFit: "cover" }}
           src={

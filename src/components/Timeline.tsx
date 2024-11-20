@@ -167,6 +167,10 @@ const TimelineItem = styled.div`
 
   color: #584a54;
   font-weight: 700;
+  font-size: 14px;
+
+  flex: 0 0 auto;
+  overflow: hidden;
 `;
 
 const TimelineItemText = styled.div`

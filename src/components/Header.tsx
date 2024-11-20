@@ -13,13 +13,15 @@ export default function Header() {
   const [user, setUser] = useState<UserInfo | null>(null);
 
   useEffect(() => {
-    const prevUser = getCurrentUser();
-    console.log("prevUser", prevUser);
-    if (prevUser) {
-      const name = prevUser.displayName;
-      if (!name) logOut();
-      else setUser({ name, profile: prevUser.photoURL });
-    }
+    const asyncWrapper = async () => {
+      const prevUser = await getCurrentUser();
+      if (prevUser) {
+        const name = prevUser.displayName;
+        if (!name) logOut();
+        else setUser({ name, profile: prevUser.photoURL });
+      }
+    };
+    asyncWrapper();
   }, []);
 
   return (

@@ -1,25 +1,36 @@
-import { useNavigate, useParams } from "react-router-dom";
-import styled from "styled-components";
-import Timeline from "../components/Timeline";
-import Video from "../components/Video";
 import { useEffect, useRef, useState } from "react";
-import HallofFame from "../components/HallofFame";
-import CommonMistakes from "../components/CommonMistakes";
+import { useNavigate, useParams } from "react-router-dom";
 import ReactPlayer from "react-player";
-import Gallery from "../components/Gallery";
 
+import styled from "styled-components";
 import { Flex } from "antd";
-import CommentInput from "../components/CommentInput";
-import Thread from "../components/Thread";
+
 import { getComments, ReplyDto, ThreadDto } from "../apis/comments";
 import { getSections, SectionData } from "../apis/sections";
-// import { createUser } from "../apis/users";
-import TagButton from "../components/TagButton";
 import { getVideoById, VideoData } from "../apis/videos";
+import { db } from "../config/firebase";
+import { doc, onSnapshot } from "firebase/firestore";
+
+import Timeline from "../components/Timeline";
+import Video from "../components/Video";
+import HallofFame from "../components/HallofFame";
+import CommonMistakes from "../components/CommonMistakes";
+import Gallery from "../components/Gallery";
+import CommentInput from "../components/CommentInput";
+import Thread from "../components/Thread";
+import TagButton from "../components/TagButton";
 
 export default function Watch() {
   const videoId = useParams().watchId as string;
   const navigate = useNavigate();
+
+  /* Alert and match data sync */
+  useEffect(() => {
+    const unsubscribe = onSnapshot(doc(db, "videos", videoId), (doc) => {
+      console.log("Current data change: ", doc.data());
+    });
+    return () => unsubscribe();
+  }, [videoId]);
 
   // [1] for video interaction
   const [time, setTime] = useState<number>(0);
@@ -180,12 +191,15 @@ export default function Watch() {
             {!isPlay &&
               (time === 0 ? (
                 <VideoDim>
-                  <HallofFame />
+                  <HallofFame
+                    videoId={videoId}
+                    sectionId={sections.length.toString()}
+                  />
                 </VideoDim>
               ) : (
                 !isHover && (
                   <VideoDim>
-                    <CommonMistakes />
+                    <CommonMistakes sectionId={sectionIdx} />
                   </VideoDim>
                 )
               ))}
@@ -217,7 +231,12 @@ export default function Watch() {
             <div> {video?.description}</div>
           </DescriptionContainer>
         ) : (
-          <Gallery videoId={videoId} index={getSectionIdx(time)} />
+          <Gallery
+            videoId={videoId}
+            sectionId={(getSectionIdx(time) + 1).toString()}
+            last={getSectionIdx(time) + 1 === sections.length}
+            title={video?.title}
+          />
         )}
       </VideoWrapper>
 
@@ -345,7 +364,7 @@ const VideoDim = styled.div`
 `;
 
 const CommentSectionWrapper = styled.div`
-  flex: 1;
+  flex: 1.5;
 
   width: 100%;
   height: auto;
