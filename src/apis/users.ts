@@ -6,6 +6,7 @@ import {
   DocumentData,
 } from "firebase/firestore";
 import { db } from "../config/firebase.ts";
+import { User } from "firebase/auth";
 
 export interface UserDto {
   userId: string;

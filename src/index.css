@@ -9,6 +9,13 @@
   border-radius: 100px;
 }
 
+
+/* .comment-section::-webkit-scrollbar-thumb {
+  background-color: rgba(254, 245, 239, 0.5);
+  background-color:red;
+  border-radius: 10px;
+} */
+
 .gummy {
   font-family: "Sour Gummy", sans-serif;
   font-optical-sizing: auto;

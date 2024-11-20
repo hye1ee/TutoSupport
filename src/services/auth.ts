@@ -7,6 +7,7 @@ import {
   onAuthStateChanged,
 } from "firebase/auth";
 import { auth } from "../config/firebase";
+import { createUser, getUser } from "../apis/users";
 
 export const googleProvider = new GoogleAuthProvider();
 
@@ -18,6 +19,16 @@ export const signInWithGoogle = async () => {
 
     const result = await signInWithPopup(auth, googleProvider);
     console.log("Sign in successful:", result.user);
+
+    try {
+      await getUser(result.user.uid);
+    } catch (error: any) {
+      await createUser({
+        userId: result.user.uid as string,
+        email: result.user.email as string,
+      });
+    }
+
     return result.user;
   } catch (error: any) {
     console.error("Detailed error:", {
@@ -28,6 +39,7 @@ export const signInWithGoogle = async () => {
     throw error;
   }
 };
+
 export const logOut = async () => {
   try {
     await signOut(auth);

@@ -1,5 +1,5 @@
 import { CameraOutlined, PlusOutlined } from "@ant-design/icons";
-import { Button, Image, Upload, UploadFile, UploadProps } from "antd";
+import { Button, Image, Tag, Upload, UploadFile, UploadProps } from "antd";
 import { forwardRef, useImperativeHandle, useRef, useState } from "react";
 import CustomInput from "./CustomInput";
 import { UploadRef } from "antd/es/upload/Upload";
@@ -11,6 +11,7 @@ import {
   ReplyDto,
 } from "../apis/comments";
 import { getUser } from "../apis/users";
+import { getCurrentUser } from "../services/auth";
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 interface ExtendedUploadRef<T = any> extends Omit<UploadRef<T>, "upload"> {
@@ -41,6 +42,18 @@ const CommentInput = forwardRef<CommentInputRef, Props>(
     const [previewSrc, setPreviewSrc] = useState("");
 
     const handleComment = async () => {
+      const googleUser = await getCurrentUser();
+      if (!googleUser) {
+        return;
+      }
+      console.log(googleUser);
+      const user = await getUser(googleUser.uid);
+      console.log(user);
+      if (!user) {
+        console.log("???");
+        alert("please login first");
+        return;
+      }
       const comment: ExtendedCommentDto = {
         content: commentText,
         timestamp: new Date(),
@@ -64,7 +77,7 @@ const CommentInput = forwardRef<CommentInputRef, Props>(
         videoId,
         sectionName,
         comment,
-        parentCommentId
+        parentCommentId,
       );
       if (result) {
         console.log(comment);
@@ -109,6 +122,7 @@ const CommentInput = forwardRef<CommentInputRef, Props>(
           placeholder="Add a comment"
           suffix={
             <>
+              <Tag>Tag 1</Tag>
               <Button
                 type={"text"}
                 shape="circle"
@@ -155,7 +169,7 @@ const CommentInput = forwardRef<CommentInputRef, Props>(
         )}
       </div>
     );
-  }
+  },
 );
 
 export default CommentInput;

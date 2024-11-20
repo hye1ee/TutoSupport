@@ -57,7 +57,7 @@ export default function Watch() {
 
   const getSectionIdx = (time: number) => {
     return sectionsRef.current.findIndex(
-      (section) => time >= section.startTime && time < section.endTime
+      (section) => time >= section.startTime && time < section.endTime,
     );
   };
   const updateSection = (playedTime: number) => {
@@ -84,19 +84,6 @@ export default function Watch() {
     };
     setThreads((prevThreads) => [thread, ...prevThreads]);
   };
-  // const insertSubComment = (parentCommentId: string, newReply: ReplyDto) => {
-  //   // TODO
-  //   setThreads((prevThreads) =>
-  //     prevThreads.map((thread) =>
-  //       thread.comment.id === parentCommentId
-  //         ? {
-  //             ...thread,
-  //             replies: [newReply, ...thread.replies],
-  //           }
-  //         : thread,
-  //     ),
-  //   );
-  // };
 
   useEffect(() => {
     if (videoId === undefined) navigate("/");
@@ -132,13 +119,10 @@ export default function Watch() {
 
   useEffect(() => {
     async function fetchComments() {
-      console.log("comments2", sectionIdx, sections);
+      console.log("comments2", sectionIdx, threads);
 
       if (sectionIdx > -1) {
-        const comments = await getComments(
-          videoId,
-          sections[sectionIdx].sectionName
-        );
+        const comments = await getComments(videoId, sectionIdx.toString());
         console.log("comments update");
         console.log(comments);
         setThreads(comments);
@@ -238,7 +222,7 @@ export default function Watch() {
               setEncourage([sectionId, data.clap]);
             }
           });
-        }
+        },
       );
     });
 
@@ -341,13 +325,13 @@ export default function Watch() {
         )}
       </VideoWrapper>
 
-      <CommentSectionWrapper>
+      <CommentSectionWrapper className="comment-section">
         <CommentTitleWrapper>
           {sectionIdx > -1
             ? `#${sectionIdx + 1} ${sections[sectionIdx].sectionName}`
             : "...loading"}
         </CommentTitleWrapper>
-        <Flex gap={"small"}>
+        <Flex gap={"small"} style={{ width: "100%" }}>
           <TagButton
             tag={"questions"}
             currentTag={selectedTag}
@@ -473,6 +457,11 @@ const CommentSectionWrapper = styled.div`
   display: flex;
   flex-direction: column;
   row-gap: 1em;
+
+  max-width: 100%;
+  overflow-y: scroll;
+  overflow-x: hidden;
+  scrollbar-width: thin;
 `;
 
 const CommentTitleWrapper = styled.div`
