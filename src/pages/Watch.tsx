@@ -5,7 +5,7 @@ import ReactPlayer from "react-player";
 import styled from "styled-components";
 import { Flex } from "antd";
 
-import { getComments, ReplyDto, ThreadDto } from "../apis/comments";
+import { CommentDto, getComments, ReplyDto, ThreadDto } from "../apis/comments";
 import { getSections, SectionData } from "../apis/sections";
 import { getVideoById, VideoData } from "../apis/videos";
 import { db } from "../config/firebase";
@@ -21,6 +21,7 @@ import Thread from "../components/Thread";
 import TagButton from "../components/TagButton";
 import Encourage from "../components/Encourage";
 import { getCurrentUser } from "../services/auth";
+import Recommendation from "../components/Recommendation";
 
 export default function Watch() {
   const videoId = useParams().watchId as string;
@@ -46,10 +47,16 @@ export default function Watch() {
   // [2] for sections
   const [sectionIdx, setSectionIdx] = useState(-1);
   const [sections, setSections] = useState<SectionData[]>([]);
+  const sectionsRef = useRef<SectionData[]>([]);
+
   const [video, setVideo] = useState<VideoData>();
 
+  useEffect(() => {
+    sectionsRef.current = sections;
+  }, [sections]);
+
   const getSectionIdx = (time: number) => {
-    return sections.findIndex(
+    return sectionsRef.current.findIndex(
       (section) => time >= section.startTime && time < section.endTime
     );
   };
@@ -167,10 +174,48 @@ export default function Watch() {
     if (!currTime) return;
 
     if (evt.code === "ArrowRight") {
+      onRecommendation(currTime);
       playerRef?.current?.seekTo(currTime + 5, "seconds");
     } else if (evt.code === "ArrowLeft") {
       playerRef?.current?.seekTo(currTime - 5, "seconds");
     }
+  };
+
+  interface Recommend {
+    sectionId: string;
+    currTime: number;
+    thread: ThreadDto;
+  }
+
+  const [recommend, setRecommend] = useState<Recommend | null>(null);
+
+  const onRecommendation = (currTime: number) => {
+    const prevSection = getSectionIdx(currTime);
+    const nxtSection = getSectionIdx(currTime + 5);
+    if (prevSection < nxtSection) {
+      // TODO) replace threads[0] to the selected thread
+      const thread = threads[0];
+      //
+
+      const sectionId = (prevSection + 1).toString();
+      setRecommend({
+        sectionId,
+        currTime,
+        thread,
+      });
+      setTimeout(() => setRecommend(null), 6000);
+    }
+  };
+
+  const onRecommendationClick = (currTime: number) => () => {
+    // when user click the recommendation
+    // move to the prevsection time and pause the video
+    playerRef?.current?.seekTo(currTime, "seconds");
+    setIsPlay(false);
+
+    // TODO) do something to show the comment at top!
+
+    setRecommend(null);
   };
 
   // gallery clap
@@ -234,6 +279,12 @@ export default function Watch() {
             onPointerEnter={() => setIsHover(true)}
             onPointerLeave={() => setIsHover(false)}
           >
+            {recommend && (
+              <Recommendation
+                thread={recommend.thread}
+                onClick={onRecommendationClick(recommend.currTime)}
+              />
+            )}
             {!isPlay &&
               (time === 0 ? (
                 <VideoDim>

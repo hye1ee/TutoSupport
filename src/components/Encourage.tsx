@@ -10,7 +10,10 @@ interface Props {
 
 export default function Encourage(props: Props) {
   return (
-    <EncourageWrapper run={props.run}>
+    <EncourageWrapper
+      style={{ width: window.innerWidth, height: window.innerHeight }}
+      run={props.run}
+    >
       <EncourageTitle>
         <div className="gummy">{`🥳 Congrats!  Your work on`}</div>
         <div
@@ -31,8 +34,6 @@ export default function Encourage(props: Props) {
 }
 
 const EncourageWrapper = styled.div<{ run: boolean }>`
-  width: 100vw;
-  height: 100vh;
   position: absolute;
 
   top: 0;
@@ -63,6 +64,6 @@ const EncourageTitle = styled.div`
   background-color: #d5e3f8;
   color: #584a54;
 
-  border: 2px solid #c0d5f4;
+  border: 2px solid #4f92f6;
   border-radius: 100px;
 `;
