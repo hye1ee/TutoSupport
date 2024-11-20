@@ -24,7 +24,7 @@ const formatTime = (seconds: number) => {
 const calcSectionFlex = (sections: SectionData[]) => {
   const totalDuration = sections.reduce(
     (sum, section) => sum + (section.endTime - section.startTime),
-    0
+    0,
   );
   return sections.map((section) => {
     const sectionDuration = section.endTime - section.startTime;
@@ -71,8 +71,8 @@ export default function Timeline(props: TimelineProps) {
       props.max,
       Math.max(
         props.min,
-        ((event.clientX - left) / width) * (props.max - props.min) + props.min
-      )
+        ((event.clientX - left) / width) * (props.max - props.min) + props.min,
+      ),
     );
     props.setValue(newValue);
   };

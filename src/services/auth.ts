@@ -26,6 +26,7 @@ export const signInWithGoogle = async () => {
       await createUser({
         userId: result.user.uid as string,
         email: result.user.email as string,
+        profilePicture: result.user.photoURL as string,
       });
     }
 

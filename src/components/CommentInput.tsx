@@ -1,5 +1,13 @@
 import { CameraOutlined, PlusOutlined } from "@ant-design/icons";
-import { Button, Image, Tag, Upload, UploadFile, UploadProps } from "antd";
+import {
+  Button,
+  Image,
+  Select,
+  Tag,
+  Upload,
+  UploadFile,
+  UploadProps,
+} from "antd";
 import { forwardRef, useImperativeHandle, useRef, useState } from "react";
 import CustomInput from "./CustomInput";
 import { UploadRef } from "antd/es/upload/Upload";
@@ -27,39 +35,65 @@ export interface CommentInputRef {
 
 interface Props {
   videoId: string;
-  sectionName: string;
+  sectionId: string;
   parentCommentId?: string;
   parentHandleComment?: (newReply: ReplyDto) => void;
 }
 
+const tagList = ["questions", "tips", "mistakes"];
+
 const CommentInput = forwardRef<CommentInputRef, Props>(
-  ({ videoId, sectionName, parentCommentId, parentHandleComment }, ref) => {
+  ({ videoId, sectionId, parentCommentId, parentHandleComment }, ref) => {
+    // about tag
+    const [tag, setTag] = useState("");
+
+    // about comment text
     const [commentText, setCommentText] = useState("");
     const inputRef = useRef<HTMLTextAreaElement>(null);
+    const onCommentChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+      setCommentText(e.target.value);
+
+      if (!tag) {
+        // no tag yet, add tag
+        for (const _tag of tagList) {
+          if (e.target.value.includes("#" + _tag)) {
+            setTag(_tag);
+            const updatedText = e.target.value.replace("#" + _tag, "");
+            setCommentText(updatedText);
+          }
+        }
+      }
+    };
+
+    // about image
     const uploadRef = useRef<ExtendedUploadRef>(null);
     const [imageList, setImageList] = useState<UploadFile[]>([]);
     const [previewOpen, setPreviewOpen] = useState(false);
     const [previewSrc, setPreviewSrc] = useState("");
 
     const handleComment = async () => {
-      const googleUser = await getCurrentUser();
-      if (!googleUser) {
+      if (!commentText) {
+        alert("please write something first");
         return;
       }
-      console.log(googleUser);
-      const user = await getUser(googleUser.uid);
-      console.log(user);
-      if (!user) {
-        console.log("???");
+      const googleUser = await getCurrentUser();
+      if (!googleUser) {
         alert("please login first");
+        return;
+      }
+      const user = await getUser(googleUser.uid);
+      if (!user) {
+        alert("please sign up first");
         return;
       }
       const comment: ExtendedCommentDto = {
         content: commentText,
         timestamp: new Date(),
         clap: 0,
-        userId: "1", // TODO
-        user: await getUser("1"), // TODO
+        clapped: false,
+        userId: user.userId,
+        user: user,
+        tag: tag,
         clappedBy: [],
       };
       if (imageList.length > 0) {
@@ -75,7 +109,7 @@ const CommentInput = forwardRef<CommentInputRef, Props>(
       }
       const result = await handleAdd(
         videoId,
-        sectionName,
+        sectionId,
         comment,
         parentCommentId,
       );
@@ -86,9 +120,10 @@ const CommentInput = forwardRef<CommentInputRef, Props>(
       }
       setCommentText("");
       setImageList([]);
+      setTag("");
       inputRef.current?.blur();
       if (parentHandleComment)
-        parentHandleComment({ ...comment, isPinned: false });
+        parentHandleComment({ ...comment, id: result, isPinned: false });
     };
 
     useImperativeHandle(ref, () => ({
@@ -122,7 +157,6 @@ const CommentInput = forwardRef<CommentInputRef, Props>(
           placeholder="Add a comment"
           suffix={
             <>
-              <Tag>Tag 1</Tag>
               <Button
                 type={"text"}
                 shape="circle"
@@ -141,8 +175,14 @@ const CommentInput = forwardRef<CommentInputRef, Props>(
               />
             </>
           }
-          onChange={(e) => setCommentText(e.target.value)}
+          onChange={onCommentChange}
         ></CustomInput>
+
+        {tag && (
+          <Tag closeIcon onClose={() => setTag("")}>
+            {tag}
+          </Tag>
+        )}
 
         <Upload
           ref={uploadRef}

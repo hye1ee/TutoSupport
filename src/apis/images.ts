@@ -1,4 +1,4 @@
-import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
+import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
 import { storage } from "../config/firebase.ts";
 
 export const uploadImage = async (file: File, path: string) => {
@@ -8,7 +8,7 @@ export const uploadImage = async (file: File, path: string) => {
     const downloadURL = await getDownloadURL(storageRef);
     return downloadURL;
   } catch (error) {
-    console.error('Error uploading image:', error);
+    console.error("Error uploading image:", error);
     throw error;
   }
 };

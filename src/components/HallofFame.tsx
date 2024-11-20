@@ -30,7 +30,7 @@ export default function HallofFame(props: HallofFameProps) {
         const response = await getGalleryClappedUsers(
           props.videoId,
           props.sectionId,
-          img.userId
+          img.userId,
         );
         return response.includes(user.uid); // 반환값
       });
@@ -48,7 +48,7 @@ export default function HallofFame(props: HallofFameProps) {
         props.videoId,
         "sections",
         props.sectionId,
-        "gallery"
+        "gallery",
       ),
       (snapshot) => {
         setImages(
@@ -57,9 +57,9 @@ export default function HallofFame(props: HallofFameProps) {
               id: doc.id,
               ...doc.data(),
             };
-          }) as GalleryImage[]
+          }) as GalleryImage[],
         );
-      }
+      },
     );
     return () => unsubscribe();
   }, [props.sectionId]);

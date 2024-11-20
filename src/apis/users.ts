@@ -28,7 +28,7 @@ export const createUser = async (userData: UserDto) => {
 export const getUser = async (userId: string): Promise<UserDto> => {
   try {
     const userDoc = (await getDoc(
-      doc(db, "users", userId)
+      doc(db, "users", userId),
     )) as DocumentSnapshot<UserDto, DocumentData>;
 
     if (userDoc.exists()) {

@@ -30,7 +30,7 @@ export const getSections = async (videoId: string): Promise<SectionData[]> => {
   try {
     // const videoId = encodeURIComponent(videoId);
     const sectionsSnapshot = (await getDocs(
-      collection(db, "videos", videoId, "sections")
+      collection(db, "videos", videoId, "sections"),
     )) as QuerySnapshot<SectionData, DocumentData>;
     return sectionsSnapshot.docs.map((doc) => ({
       // id: doc.id,

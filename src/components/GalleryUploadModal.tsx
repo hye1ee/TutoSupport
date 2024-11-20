@@ -16,7 +16,7 @@ export default function GalleryUploadModal(props: GalleryUploadModalProps) {
   const [fileName, setFileName] = useState<string | null>(null); // 파일 이름 저장
 
   const handleFileSelect = async (
-    event: React.ChangeEvent<HTMLInputElement>
+    event: React.ChangeEvent<HTMLInputElement>,
   ) => {
     const file = event.target.files?.[0]; // 선택한 파일
     if (file) {

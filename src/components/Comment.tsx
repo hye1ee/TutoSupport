@@ -10,14 +10,14 @@ const { Text } = Typography;
 
 export default function Comment({
   videoId,
-  sectionName,
+  sectionId,
   comment,
   isSubcomment,
   children,
   insertSubComment,
 }: {
   videoId: string;
-  sectionName: string;
+  sectionId: string;
   comment: CommentDto;
   isSubcomment: boolean;
   children?: React.ReactElement<Comment>[];
@@ -50,11 +50,10 @@ export default function Comment({
         <Flex gap={"small"}>
           <ClapButton
             videoId={videoId}
-            sectionId={sectionName}
-            commentId={comment.id ? comment.id : "lmao"} // TODO
-            // _clapped={comment.clapped}
-            // TODO clapped
-            _clapped={false}
+            sectionId={sectionId}
+            commentId={comment.id ? comment.id : ""}
+            parentCommentId={comment.parentId}
+            _clapped={comment.clapped}
             _clap={comment.clap}
           />
           {!isSubcomment && (
@@ -67,7 +66,7 @@ export default function Comment({
           <CommentInput
             ref={commentInputRef}
             videoId={videoId}
-            sectionName={sectionName}
+            sectionId={sectionId}
             parentCommentId={comment.id}
             parentHandleComment={handleSubComment}
           />
@@ -91,23 +90,3 @@ export default function Comment({
     </Flex>
   );
 }
-
-// TODO
-// const CommentWrapper = styled.div`
-//   width: 100%;
-//   height: auto;
-
-//   display: flex;
-//   flex-direction: row;
-//   column-gap: 0.8em;
-//   background-color: red;
-// `;
-
-// const CommentContentWrapper = styled.div`
-//   width: 100%;
-//   height: auto;
-
-//   display: flex;
-//   flex-direction: column;
-//   background-color: orange;
-// `;

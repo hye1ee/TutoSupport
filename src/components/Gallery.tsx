@@ -40,9 +40,9 @@ export default function Gallery({
               id: doc.id,
               ...doc.data(),
             };
-          }) as GalleryImage[]
+          }) as GalleryImage[],
         );
-      }
+      },
     );
     return () => unsubscribe();
   }, [sectionId]);
@@ -56,7 +56,7 @@ export default function Gallery({
         const response = await getGalleryClappedUsers(
           videoId,
           sectionId,
-          img.userId
+          img.userId,
         );
         return response.includes(user.uid); // 반환값
       });
@@ -156,7 +156,7 @@ export default function Gallery({
                   onClicked={claps ? claps[index] : false}
                   onClick={clapImage(image.id)}
                 />
-              )
+              ),
           )}
         </GalleryItemScroller>
       </GalleryItemWrapper>

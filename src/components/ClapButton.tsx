@@ -1,12 +1,14 @@
 import { Button } from "antd";
 import { ClapFalseIcon, ClapTrueIcon } from "../assets/clap";
 import { useState } from "react";
-import { clapComment } from "../apis/comments";
+import { clapComment, handleClapCommentReply } from "../apis/comments";
+import { getCurrentUser } from "../services/auth";
 
 interface ClapButtonProps {
   videoId: string;
   sectionId: string;
   commentId: string;
+  parentCommentId?: string;
   _clapped: boolean;
   _clap: number;
 }
@@ -17,7 +19,20 @@ const ClapButton: React.FC<ClapButtonProps> = (props) => {
 
   const handleClap = async () => {
     const prevClapped = clapped;
-    await clapComment(props.videoId, props.sectionId, props.commentId);
+    console.log("handleClap", props);
+
+    const googleUser = await getCurrentUser();
+    if (!googleUser) {
+      alert("please login first");
+      return;
+    }
+
+    await handleClapCommentReply(
+      props.videoId,
+      props.sectionId,
+      props.commentId,
+      props.parentCommentId,
+    );
     setClapped(!prevClapped);
     if (prevClapped) {
       setClap((prevClap) => prevClap - 1);

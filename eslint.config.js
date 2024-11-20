@@ -3,6 +3,7 @@ import globals from "globals";
 import reactHooks from "eslint-plugin-react-hooks";
 import reactRefresh from "eslint-plugin-react-refresh";
 import tseslint from "typescript-eslint";
+import unusedImports from "eslint-plugin-unused-imports";
 import prettier from "eslint-plugin-prettier";
 
 export default tseslint.config(
@@ -17,6 +18,7 @@ export default tseslint.config(
     plugins: {
       "react-hooks": reactHooks,
       "react-refresh": reactRefresh,
+      "unused-imports": unusedImports,
       prettier: prettier,
     },
     rules: {
@@ -26,8 +28,9 @@ export default tseslint.config(
         { allowConstantExport: true },
       ],
       "@typescript-eslint/no-unused-vars": "warn",
+      "unused-imports/no-unused-imports": "warn",
       "no-empty": "warn",
-      "prettier/prettier": ["warn"],
+      "prettier/prettier": ["warn", { trailingComma: "es5" }],
     },
   }
 );

@@ -10,6 +10,7 @@ import {
   QuerySnapshot,
   orderBy,
   query,
+  Timestamp,
 } from "firebase/firestore";
 import { db } from "../config/firebase.ts";
 import { getCurrentUser } from "../services/auth";
@@ -24,12 +25,14 @@ export interface ThreadDto {
 
 export interface CommentDto {
   id?: string;
+  parentId?: string;
   user?: UserDto;
   content: string;
   img?: string;
   tag?: string; // Optional tag for the comment
-  timestamp: Date;
+  timestamp: Timestamp;
   clap: number;
+  clapped: boolean;
   clappedBy: string[];
   // clapped: boolean;
 }
@@ -183,11 +186,18 @@ export const getComments = async (
           };
         }
 
+        const currentUser = getCurrentUser();
+
         // Sort replies to show pinned replies first
         const replies: ReplyDto[] = repliesSnapshot.docs
           .map((replyDoc) => {
             return {
+              id: replyDoc.id,
+              parentId: doc.id,
               ...replyDoc.data(),
+              clapped: currentUser
+                ? replyDoc.data().clappedBy.includes(currentUser.uid)
+                : false,
             } as ReplyDto;
           })
           .sort((a, b) => {
@@ -203,6 +213,9 @@ export const getComments = async (
             ...doc.data(),
             id: doc.id,
             user: userData,
+            clapped: currentUser
+              ? doc.data().clappedBy.includes(currentUser.uid)
+              : false,
           }, // Add id: doc.id here
           replies: replies,
           isReplyPinned: replies.length != 0 ? replies[0].isPinned : false,
@@ -218,7 +231,7 @@ export const getComments = async (
 };
 
 // handle clap
-export const handleClap = async (
+export const handleClapCommentReply = async (
   videoId: string,
   sectionId: string,
   commentId: string,
@@ -238,6 +251,7 @@ export const clapComment = async (
   commentId: string
 ) => {
   try {
+    console.log("clapComment", videoId, sectionId, commentId);
     const commentRef = doc(
       db,
       "videos",
@@ -253,22 +267,35 @@ export const clapComment = async (
       const { clap, userId, clappedBy = [] } = commentDoc.data();
       const currentUser = getCurrentUser();
 
-      if (currentUser && !clappedBy.includes(currentUser.uid)) {
-        await setDoc(
-          commentRef,
-          {
-            clap: clap + 1,
-            clappedBy: [...clappedBy, currentUser.uid],
-          },
-          { merge: true }
-        );
+      if (currentUser) {
+        if (!clappedBy.includes(currentUser.uid)) {
+          await setDoc(
+            commentRef,
+            {
+              clap: clap + 1,
+              clappedBy: [...clappedBy, currentUser.uid],
+            },
+            { merge: true }
+          );
 
-        if (currentUser.uid !== userId) {
-          await createClapNotification(
-            userId,
-            currentUser.uid,
-            commentId,
-            "comment"
+          if (currentUser.uid !== userId) {
+            await createClapNotification(
+              userId,
+              currentUser.uid,
+              commentId,
+              "comment"
+            );
+          }
+        } else {
+          await setDoc(
+            commentRef,
+            {
+              clap: clap - 1,
+              clappedBy: clappedBy.filter(
+                (uid: string) => uid !== currentUser.uid
+              ),
+            },
+            { merge: true }
           );
         }
       }

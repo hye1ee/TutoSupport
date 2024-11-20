@@ -3,9 +3,8 @@ import { useNavigate, useParams } from "react-router-dom";
 import ReactPlayer from "react-player";
 
 import styled from "styled-components";
-import { Flex } from "antd";
 
-import { getComments, ReplyDto, ThreadDto } from "../apis/comments";
+import { ThreadDto } from "../apis/comments";
 import { getSections, SectionData } from "../apis/sections";
 import { getVideoById, VideoData } from "../apis/videos";
 import { db } from "../config/firebase";
@@ -16,12 +15,12 @@ import Video from "../components/Video";
 import HallofFame from "../components/HallofFame";
 import CommonMistakes from "../components/CommonMistakes";
 import Gallery from "../components/Gallery";
-import CommentInput from "../components/CommentInput";
-import Thread from "../components/Thread";
-import TagButton from "../components/TagButton";
 import Encourage from "../components/Encourage";
 import { getCurrentUser } from "../services/auth";
 import Recommendation from "../components/Recommendation";
+import CommentSection, {
+  CommentSectionRef,
+} from "../components/CommentSection";
 
 export default function Watch() {
   const videoId = useParams().watchId as string;
@@ -57,32 +56,12 @@ export default function Watch() {
 
   const getSectionIdx = (time: number) => {
     return sectionsRef.current.findIndex(
-      (section) => time >= section.startTime && time < section.endTime,
+      (section) => time >= section.startTime && time < section.endTime
     );
   };
   const updateSection = (playedTime: number) => {
     const idx = getSectionIdx(playedTime);
     setSectionIdx(idx);
-  };
-
-  // [3] for comments
-  const [selectedTag, setSelectedTag] = useState<string | null>(null);
-  const handleTagClick = (tag: string) => {
-    if (tag == selectedTag) setSelectedTag(null);
-    else setSelectedTag(tag);
-  };
-
-  const [threads, setThreads] = useState<ThreadDto[]>([]);
-  const filteredThreads = selectedTag
-    ? threads.filter((thread) => thread.comment.tag == selectedTag)
-    : threads;
-  const handleThread = (newReply: ReplyDto) => {
-    const thread: ThreadDto = {
-      comment: newReply,
-      replies: [],
-      isReplyPinned: false,
-    };
-    setThreads((prevThreads) => [thread, ...prevThreads]);
   };
 
   useEffect(() => {
@@ -100,8 +79,6 @@ export default function Watch() {
       // await addSection(videoId, sampleSections[0]);
       // await addSection(videoId, sampleSections[1]);
       // await addSection(videoId, sampleSections[2]);
-      // const userId = await createUser({ userId: "1", email: "email" });
-      // console.log(userId);
       setVideo((await getVideoById(videoId)) as VideoData);
       const sections = await getSections(videoId);
       console.log("sections", sections);
@@ -116,24 +93,6 @@ export default function Watch() {
       setSectionIdx(uniqueSections.length != 0 ? 0 : -1);
     }
   }, []);
-
-  useEffect(() => {
-    async function fetchComments() {
-      console.log("comments2", sectionIdx, threads);
-
-      if (sectionIdx > -1) {
-        const comments = await getComments(videoId, sectionIdx.toString());
-        console.log("comments update");
-        console.log(comments);
-        setThreads(comments);
-        // setThreads(threadsExample);
-
-        //TODO) set common mistakes
-        setMistakes([]);
-      }
-    }
-    fetchComments();
-  }, [videoId, sections, sectionIdx]);
 
   // when user moves timeline handle
   useEffect(() => {
@@ -152,8 +111,17 @@ export default function Watch() {
     updateSection(playedTime);
   };
 
-  //
+  // handle key events
   const keyEventHandler = (evt: KeyboardEvent) => {
+    const target = evt.target as HTMLElement;
+    if (
+      target.tagName === "TEXTAREA" ||
+      target.tagName === "INPUT" ||
+      target.isContentEditable
+    ) {
+      return;
+    }
+
     if (evt.code === "Space") {
       setIsPlay((prev) => !prev);
     }
@@ -167,6 +135,9 @@ export default function Watch() {
       playerRef?.current?.seekTo(currTime - 5, "seconds");
     }
   };
+
+  // [3] comments
+  const commentSectionRef = useRef<CommentSectionRef>(null);
 
   interface Recommend {
     sectionId: string;
@@ -182,8 +153,10 @@ export default function Watch() {
     const nxtSection = getSectionIdx(currTime + 5);
     if (prevSection < nxtSection) {
       // TODO) replace threads[0] to the selected thread
-      const thread = threads[0];
-      //
+      const thread = commentSectionRef.current?.parentGetRecommend();
+      if (!thread) {
+        return;
+      }
 
       const sectionId = (prevSection + 1).toString();
       setRecommend({
@@ -202,7 +175,10 @@ export default function Watch() {
     setIsPlay(false);
 
     // TODO) do something to show the comment at top!
-
+    if (!recommend || !recommend.thread.comment.id) {
+      return;
+    }
+    commentSectionRef.current?.parentPullUpComment(recommend.thread.comment.id);
     setRecommend(null);
   };
 
@@ -222,13 +198,14 @@ export default function Watch() {
               setEncourage([sectionId, data.clap]);
             }
           });
-        },
+        }
       );
     });
 
     return () => unsubs.forEach((unsub) => unsub());
   }, [sections]);
 
+  // encourage
   const [encourage, setEncourage] = useState<number[] | null>(null);
   const [confetti, setConfetti] = useState<boolean>(false);
   useEffect(() => {
@@ -284,7 +261,13 @@ export default function Watch() {
               ) : (
                 isHover && (
                   <VideoDim>
-                    <CommonMistakes threads={mistakes} sectionId={sectionIdx} />
+                    <CommonMistakes
+                      threads={mistakes}
+                      sectionId={sectionIdx}
+                      setSelectedTag={
+                        commentSectionRef.current?.parentSetSelectedTag
+                      }
+                    />
                   </VideoDim>
                 )
               ))}
@@ -324,46 +307,13 @@ export default function Watch() {
           />
         )}
       </VideoWrapper>
-
-      <CommentSectionWrapper className="comment-section">
-        <CommentTitleWrapper>
-          {sectionIdx > -1
-            ? `#${sectionIdx + 1} ${sections[sectionIdx].sectionName}`
-            : "...loading"}
-        </CommentTitleWrapper>
-        <Flex gap={"small"} style={{ width: "100%" }}>
-          <TagButton
-            tag={"questions"}
-            currentTag={selectedTag}
-            onClick={handleTagClick}
-          />
-          <TagButton
-            tag={"tips"}
-            currentTag={selectedTag}
-            onClick={handleTagClick}
-          />
-          <TagButton
-            tag={"mistakes"}
-            currentTag={selectedTag}
-            onClick={handleTagClick}
-          />
-        </Flex>
-        <CommentInput
-          videoId={videoId}
-          sectionName={sectionIdx > -1 ? sections[sectionIdx].sectionName : ""}
-          parentHandleComment={handleThread}
-        />
-        {filteredThreads.map((thread, index) => (
-          <Thread
-            key={index}
-            videoId={videoId}
-            sectionName={
-              sectionIdx > -1 ? sections[sectionIdx].sectionName : ""
-            }
-            _thread={thread}
-          />
-        ))}
-      </CommentSectionWrapper>
+      <CommentSection
+        ref={commentSectionRef}
+        videoId={videoId}
+        sectionId={time == 0 ? undefined : (getSectionIdx(time) + 1).toString()}
+        sectionName={sectionIdx > -1 ? sections[sectionIdx].sectionName : ""}
+        setMistakes={setMistakes}
+      />
     </PageWrapper>
   );
 }
@@ -446,28 +396,4 @@ const VideoDim = styled.div`
 
   color: white;
   background-color: rgba(62, 57, 61, 0.9);
-`;
-
-const CommentSectionWrapper = styled.div`
-  flex: 1.5;
-
-  width: 100%;
-  height: auto;
-
-  display: flex;
-  flex-direction: column;
-  row-gap: 1em;
-
-  max-width: 100%;
-  overflow-y: scroll;
-  overflow-x: hidden;
-  scrollbar-width: thin;
-`;
-
-const CommentTitleWrapper = styled.div`
-  padding: 10px 20px;
-  border-radius: 40px;
-
-  background-color: #584a54;
-  color: #fef5ef;
 `;

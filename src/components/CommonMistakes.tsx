@@ -4,6 +4,7 @@ import { ThreadDto } from "../apis/comments";
 interface CommonMistakesProps {
   sectionId: number;
   threads: ThreadDto[];
+  setSelectedTag?: (selectedTag: string) => void;
 }
 
 export default function CommonMistakes(props: CommonMistakesProps) {
@@ -22,18 +23,18 @@ export default function CommonMistakes(props: CommonMistakesProps) {
           Stuck? You might have made the following mistakes
         </div>
 
-        <Mistake
-          mistake="dfd dfd dfd dfd dfd dfd dfd dfd dfd dfd dfd dfd dfd dfd dfd dfd dfd
-            dfd dfd dfd dfd dfd dfd dfd dfd dfd dfd dfd dfd dfd dfd dfd dfd dfd
-            dfd dfd dfd dfd dfd dfd dfd dfd dfd"
-          solution="dfd dfd dfd dfd dfd dfd dfd dfd dfd dfd dfd dfd dfd dfd dfd dfd dfd
-            dfd dfd dfd dfd dfd dfd dfd dfd dfd dfd dfd dfd dfd dfd dfd dfd dfd
-            dfd dfd dfd dfd dfd dfd dfd dfd dfd"
-          clap={284}
-        />
-
         {props.threads.map((thread) => (
-          <div>{thread.comment.content}</div>
+          <Mistake
+            mistake={thread.comment.content}
+            solution={
+              thread.replies.length > 0
+                ? thread.replies[0].content
+                : "You should really try doing this instead of that"
+            }
+            clap={thread.comment.clap}
+            imgUrl={thread.comment.img}
+            setSelectedTag={props.setSelectedTag}
+          />
         ))}
       </BoardBody>
     </BoardWrapper>
@@ -47,11 +48,13 @@ const Mistake = ({
   mistake,
   solution,
   clap,
+  setSelectedTag,
 }: {
   imgUrl?: string;
   mistake: string;
   solution: string;
   clap: number;
+  setSelectedTag?: (selectedTag: string) => void;
 }) => {
   if (mistake.length > maxLength) {
     mistake = mistake.slice(0, maxLength) + "...";
@@ -61,16 +64,20 @@ const Mistake = ({
   }
 
   return (
-    <MistakeWrapper>
-      <img
-        style={{
-          height: "100%",
-          aspectRatio: 1 / 1,
-          width: "auto",
-          objectFit: "cover",
-        }}
-        src={imgUrl ?? "/images/Icon_img.png"}
-      />
+    <MistakeWrapper
+      onClick={() => setSelectedTag && setSelectedTag("mistakes")}
+    >
+      {imgUrl && (
+        <img
+          style={{
+            height: "100%",
+            aspectRatio: 1 / 1,
+            width: "auto",
+            objectFit: "cover",
+          }}
+          src={imgUrl ?? "/images/Icon_img.png"}
+        />
+      )}
       <div
         style={{
           flex: 1,
