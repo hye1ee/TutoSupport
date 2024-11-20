@@ -114,11 +114,7 @@ export default function Watch() {
   // handle key events
   const keyEventHandler = (evt: KeyboardEvent) => {
     const target = evt.target as HTMLElement;
-    if (
-      target.tagName === "TEXTAREA" ||
-      target.tagName === "INPUT" ||
-      target.isContentEditable
-    ) {
+    if (target.tagName === "TEXTAREA") {
       return;
     }
 

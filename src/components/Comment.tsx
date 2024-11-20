@@ -15,6 +15,7 @@ export default function Comment({
   isSubcomment,
   children,
   insertSubComment,
+  handleClap,
 }: {
   videoId: string;
   sectionId: string;
@@ -22,6 +23,7 @@ export default function Comment({
   isSubcomment: boolean;
   children?: React.ReactElement<Comment>[];
   insertSubComment?: (newReply: ReplyDto) => void;
+  handleClap: () => void;
 }) {
   const navigate = useNavigate();
   const [showReplies, setShowReplies] = useState(false);
@@ -55,6 +57,7 @@ export default function Comment({
             parentCommentId={comment.parentId}
             _clapped={comment.clapped}
             _clap={comment.clap}
+            handleClap={handleClap}
           />
           {!isSubcomment && (
             <Button type="text" shape="round" onClick={handleReplyClick}>

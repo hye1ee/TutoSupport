@@ -18,6 +18,9 @@ export default function Root() {
           // text button
           colorFillTertiary: "#FEF5EF", // hover color
           colorFill: "#E3BB97", // press color
+
+          // font
+          fontFamily: "Nunito",
         },
         components: {
           Button: {
@@ -25,6 +28,7 @@ export default function Root() {
             primaryShadow: "none",
             fontSize: 11,
             fontWeight: 600,
+            fontFamily: "Sour Gummy",
           },
           Input: {
             borderRadius: 20,

@@ -1,8 +1,8 @@
 import { Button } from "antd";
 import { ClapFalseIcon, ClapTrueIcon } from "../assets/clap";
-import { useState } from "react";
 import { handleClapCommentReply } from "../apis/comments";
 import { getCurrentUser } from "../services/auth";
+import { useMemo } from "react";
 
 interface ClapButtonProps {
   videoId: string;
@@ -11,16 +11,14 @@ interface ClapButtonProps {
   parentCommentId?: string;
   _clapped: boolean;
   _clap: number;
+  handleClap: () => void;
 }
 
 const ClapButton: React.FC<ClapButtonProps> = (props) => {
-  const [clapped, setClapped] = useState(props._clapped);
-  const [clap, setClap] = useState(props._clap);
+  const clapped = useMemo(() => props._clapped, [props._clapped]);
+  const clap = useMemo(() => props._clap, [props._clap]);
 
   const handleClap = async () => {
-    const prevClapped = clapped;
-    console.log("handleClap", props);
-
     const googleUser = await getCurrentUser();
     if (!googleUser) {
       alert("please login first");
@@ -33,24 +31,33 @@ const ClapButton: React.FC<ClapButtonProps> = (props) => {
       props.commentId,
       props.parentCommentId
     );
-    setClapped(!prevClapped);
-    if (prevClapped) {
-      setClap((prevClap) => prevClap - 1);
-    } else {
-      setClap((prevClap) => prevClap + 1);
-    }
+    props.handleClap();
   };
 
   return (
-    <Button
-      key={props.commentId}
-      type={clapped ? "primary" : "default"}
-      shape="round"
-      icon={clapped ? <ClapTrueIcon /> : <ClapFalseIcon />}
-      onClick={handleClap}
-    >
-      {clap}
-    </Button>
+    <>
+      {clapped ? (
+        <Button
+          key={props.commentId}
+          type={"primary"}
+          shape="round"
+          icon={<ClapTrueIcon />}
+          onClick={handleClap}
+        >
+          {clap}
+        </Button>
+      ) : (
+        <Button
+          key={props.commentId}
+          type={"default"}
+          shape="round"
+          icon={<ClapFalseIcon />}
+          onClick={handleClap}
+        >
+          {clap}
+        </Button>
+      )}
+    </>
   );
 };
 

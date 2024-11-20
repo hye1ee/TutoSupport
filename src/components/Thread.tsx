@@ -7,11 +7,13 @@ export default function Thread({
   sectionId,
   thread,
   insertSubComment,
+  handleClap,
 }: {
   videoId: string;
   sectionId: string;
   thread: ThreadDto;
   insertSubComment: (threadId: string, newReply: ReplyDto) => void;
+  handleClap: (threadId: string, replyId?: string) => void;
 }) {
   return (
     <ThreadWrapper>
@@ -23,6 +25,9 @@ export default function Thread({
         insertSubComment={(newReply: ReplyDto) =>
           insertSubComment(thread.comment.id as string, newReply)
         }
+        handleClap={() =>
+          handleClap(thread.comment.id ? thread.comment.id : "")
+        }
       >
         {thread.replies.map((comment, index) => (
           <Comment
@@ -31,6 +36,9 @@ export default function Thread({
             sectionId={sectionId}
             comment={comment}
             isSubcomment={true}
+            handleClap={() =>
+              handleClap(thread.comment.id ? thread.comment.id : "", comment.id)
+            }
           />
         ))}
       </Comment>

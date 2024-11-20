@@ -15,7 +15,7 @@ import styled from "styled-components";
 export interface CommentSectionRef {
   parentSetSelectedTag: (selectedTag: string) => void;
   parentPullUpComment: (threadId: string) => void;
-  parentGetRecommend: () => ThreadDto;
+  parentGetRecommend: () => ThreadDto | null;
 }
 
 interface Props {
@@ -48,17 +48,22 @@ const CommentSection = forwardRef<CommentSectionRef, Props>(
         });
       },
       parentGetRecommend() {
-        return threads
-          .filter(
-            (thread) =>
-              thread.replies.length === 0 && thread.comment.tag == "questions"
-          ) // Ensure replies array is empty
-          .reduce((latest, current) => {
-            return current.comment.timestamp.seconds >
-              latest.comment.timestamp.seconds
-              ? current
-              : latest;
-          });
+        const filteredThreads = threads.filter(
+          (thread) =>
+            thread.replies.length === 0 && thread.comment.tag == "questions"
+        );
+
+        if (filteredThreads.length === 0) {
+          return null;
+        }
+
+        const latestThread = filteredThreads.reduce((latest, current) => {
+          return current.comment.timestamp.seconds >
+            latest.comment.timestamp.seconds
+            ? current
+            : latest;
+        });
+        return latestThread;
       },
     }));
 
@@ -102,6 +107,48 @@ const CommentSection = forwardRef<CommentSectionRef, Props>(
             : thread
         )
       );
+    };
+
+    // update ui after clap
+    const handleClap = (threadId: string, replyId?: string) => {
+      if (!replyId) {
+        setThreads((prevThreads) =>
+          prevThreads.map((thread) =>
+            thread.comment.id === threadId
+              ? {
+                  ...thread,
+                  comment: {
+                    ...thread.comment,
+                    clap: thread.comment.clapped
+                      ? thread.comment.clap - 1
+                      : thread.comment.clap + 1,
+                    clapped: !thread.comment.clapped,
+                  },
+                }
+              : thread
+          )
+        );
+      } else {
+        setThreads((prevThreads) =>
+          prevThreads.map((thread) => {
+            if (thread.comment.id === threadId) {
+              return {
+                ...thread,
+                replies: thread.replies.map((reply) =>
+                  reply.id === replyId
+                    ? {
+                        ...reply,
+                        clap: reply.clapped ? reply.clap - 1 : reply.clap + 1,
+                        clapped: !reply.clapped,
+                      }
+                    : reply
+                ),
+              };
+            }
+            return thread;
+          })
+        );
+      }
     };
 
     useEffect(() => {
@@ -164,6 +211,7 @@ const CommentSection = forwardRef<CommentSectionRef, Props>(
               sectionId={sectionId}
               thread={thread}
               insertSubComment={handleSubComment}
+              handleClap={handleClap}
             />
           ))}
       </CommentSectionWrapper>

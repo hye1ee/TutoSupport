@@ -88,8 +88,10 @@ const CommentInput = forwardRef<CommentInputRef, Props>(
         user: user,
         tag: tag,
         clappedBy: [],
-        parentId: parentCommentId,
       };
+      if (parentCommentId) {
+        comment.parentId = parentCommentId;
+      }
       if (imageList.length > 0) {
         let src = imageList[0].url as string;
         if (!src) {
