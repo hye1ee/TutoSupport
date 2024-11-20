@@ -1,6 +1,10 @@
 import styled from "styled-components";
 
-export default function CommonMistakes() {
+interface CommonMistakesProps {
+  sectionId: number;
+}
+
+export default function CommonMistakes(props: CommonMistakesProps) {
   return (
     <BoardWrapper>
       <BoardHeader>

@@ -54,7 +54,7 @@ export const getGalleryImages = async (videoId: string, sectionId: string) => {
     return gallerySnapshot.docs.map((doc) => ({
       id: doc.id,
       ...doc.data(),
-    }));
+    })) as GalleryImage[];
   } catch (error) {
     console.error("Error getting gallery images:", error);
     throw error;

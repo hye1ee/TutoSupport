@@ -9,36 +9,51 @@ import {
 } from "../apis/gallery";
 import GalleryUploadModal from "./GalleryUploadModal";
 import { getCurrentUser } from "../services/auth";
+import { collection, onSnapshot } from "firebase/firestore";
+import { db } from "../config/firebase";
 
 export default function Gallery({
-  index,
+  sectionId,
   videoId,
+  last,
+  title,
 }: {
-  index: number;
+  sectionId: string;
   videoId: string;
+  last: boolean;
+  title?: string;
 }) {
   const [images, setImages] = useState<GalleryImage[]>([]);
   const [upload, setUpload] = useState<boolean>(false);
   const [userId, setUserId] = useState<string | null>(null);
 
+  // track gallery images
   useEffect(() => {
-    console.log("image updated", images);
-  }, [images]);
+    const unsubscribe = onSnapshot(
+      collection(db, "videos", videoId, "sections", sectionId, "gallery"),
+      (snapshot) => {
+        setImages(
+          snapshot.docs.map((doc) => {
+            return {
+              id: doc.id,
+              ...doc.data(),
+            };
+          }) as GalleryImage[]
+        );
+      }
+    );
+    return () => unsubscribe();
+  }, [sectionId]);
 
   useEffect(() => {
     const asyncWrapper = async () => {
-      setImages(
-        (await getGalleryImages(
-          videoId,
-          (index + 1).toString()
-        )) as GalleryImage[]
-      );
+      setImages((await getGalleryImages(videoId, sectionId)) as GalleryImage[]);
     };
     asyncWrapper();
-  }, [index]);
+  }, [sectionId]);
 
   const clapImage = (imageId: string) => () => {
-    clapGalleryImage(videoId, (index + 1).toString(), imageId);
+    clapGalleryImage(videoId, sectionId, imageId);
   };
 
   const onUploadClick = async () => {
@@ -46,6 +61,8 @@ export default function Gallery({
     if (user) {
       setUserId(user.uid);
       setUpload(true);
+    } else {
+      window.alert("please login first");
     }
   };
 
@@ -54,7 +71,7 @@ export default function Gallery({
       {upload && userId && (
         <GalleryUploadModal
           videoId={videoId}
-          sectionId={(index + 1).toString()}
+          sectionId={sectionId}
           userId={userId}
           onCancel={() => {
             setUpload(false);
@@ -63,18 +80,49 @@ export default function Gallery({
         />
       )}
       <GalleryHeader>
-        <GalleryTitle>{"Who is working on "}</GalleryTitle>
-        <GalleryTitle style={{ color: "#9D5C63" }}>
-          {"#" + (index + 1).toString()}
-        </GalleryTitle>
-        <GalleryTitle>{" right now?"}</GalleryTitle>
+        {last ? (
+          <>
+            <GalleryTitle>{"Who finished "}</GalleryTitle>
+            <GalleryTitle style={{ color: "#9D5C63" }}>
+              {"#" + sectionId}
+            </GalleryTitle>
+            {title && (
+              <>
+                <GalleryTitle>{" and "}</GalleryTitle>
+                <GalleryTitle style={{ color: "#9D5C63" }}>
+                  {title + "?"}
+                </GalleryTitle>
+              </>
+            )}
+          </>
+        ) : (
+          <>
+            <GalleryTitle>{"Who is working on "}</GalleryTitle>
+            <GalleryTitle style={{ color: "#9D5C63" }}>
+              {"#" + sectionId}
+            </GalleryTitle>
+            <GalleryTitle>{" right now?"}</GalleryTitle>
+          </>
+        )}
+
         <GalleryAdd onClick={onUploadClick}>
+          <div className="gummy">{"Share My Work"}</div>
           <BiPlus size={26} color="white" />
         </GalleryAdd>
       </GalleryHeader>
       <GalleryItemWrapper>
         {images.length === 0 && (
-          <GalleryTitle>{`There is nobody yet,\nBe the first uploader!`}</GalleryTitle>
+          <GalleryTitle
+            style={{
+              width: "100%",
+              height: "100%",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              textAlign: "center",
+              opacity: 0.5,
+            }}
+          >{`There is nobody yet,\nBe the first uploader!`}</GalleryTitle>
         )}
         <GalleryItemScroller>
           {images.map(
@@ -122,12 +170,19 @@ const GalleryTitle = styled.div`
 `;
 
 const GalleryAdd = styled.div`
-  width: 28px;
-  height: 28px;
+  width: fit-content;
+  height: fit-content;
+
+  color: white;
+
+  box-sizing: border-box;
+  padding: 6px 16px;
+  margin-left: 10px;
 
   display: flex;
   align-items: center;
   justify-content: center;
+  gap: 8px;
 
   background-color: #9d5c63;
 
@@ -145,8 +200,9 @@ const GalleryHeader = styled.div`
   height: fit-content;
   display: flex;
   flex-direction: row;
+  align-items: center;
 
-  gap: 4px;
+  gap: 12px;
 `;
 
 const GalleryItemWrapper = styled.div`

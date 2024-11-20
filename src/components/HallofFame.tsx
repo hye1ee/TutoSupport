@@ -1,22 +1,61 @@
 import styled from "styled-components";
 import GalleryItem from "./GalleryItem";
+import { useEffect, useState } from "react";
+import {
+  clapGalleryImage,
+  GalleryImage,
+  getGalleryImages,
+} from "../apis/gallery";
+import { HashLoader } from "react-spinners";
+import { collection, onSnapshot } from "firebase/firestore";
+import { db } from "../config/firebase";
 
-export default function HallofFame() {
-  const items = [
-    { url: "/images/Icon_img.png", clap: 100 },
-    { url: "/images/Icon_img.png", clap: 100 },
-    { url: "/images/Icon_img.png", clap: 100 },
-    { url: "/images/Icon_img.png", clap: 100 },
-    { url: "/images/Icon_img.png", clap: 100 },
-    { url: "/images/Icon_img.png", clap: 100 },
-    { url: "/images/Icon_img.png", clap: 100 },
-    { url: "/images/Icon_img.png", clap: 100 },
-    { url: "/images/Icon_img.png", clap: 100 },
-    { url: "/images/Icon_img.png", clap: 100 },
-    { url: "/images/Icon_img.png", clap: 100 },
-    { url: "/images/Icon_img.png", clap: 100 },
-    { url: "/images/Icon_img.png", clap: 100 },
-  ];
+interface HallofFameProps {
+  videoId: string;
+  sectionId: string;
+  userId?: string;
+}
+
+export default function HallofFame(props: HallofFameProps) {
+  const [images, setImages] = useState<GalleryImage[]>([]);
+
+  // track hall of fame images
+  useEffect(() => {
+    const unsubscribe = onSnapshot(
+      collection(
+        db,
+        "videos",
+        props.videoId,
+        "sections",
+        props.sectionId,
+        "gallery"
+      ),
+      (snapshot) => {
+        setImages(
+          snapshot.docs.map((doc) => {
+            return {
+              id: doc.id,
+              ...doc.data(),
+            };
+          }) as GalleryImage[]
+        );
+      }
+    );
+    return () => unsubscribe();
+  }, [props.sectionId]);
+
+  // get images first
+  useEffect(() => {
+    const asyncWrapper = async () => {
+      const newImages = await getGalleryImages(props.videoId, props.sectionId);
+      setImages(newImages);
+    };
+    asyncWrapper();
+  }, [props.sectionId]);
+
+  const onItemClick = (imageUserId: string) => async () => {
+    await clapGalleryImage(props.videoId, props.sectionId, imageUserId);
+  };
 
   return (
     <BoardWrapper>
@@ -29,15 +68,18 @@ export default function HallofFame() {
         </HeaderDescription>
       </BoardHeader>
       <BoardItemWrapper>
-        {items.map((item, index) => (
+        {images.map((image, index) => (
           <GalleryItem
             key={index}
-            url={item.url}
-            value={item.clap}
+            url={image.imageUrl}
+            value={image.clap}
             onClicked={false}
-            onClick={() => {}}
+            onClick={onItemClick(image.userId)}
           />
         ))}
+        {images.length === 0 && (
+          <HashLoader color="#9D5C63" style={{ alignSelf: "center" }} />
+        )}
       </BoardItemWrapper>
     </BoardWrapper>
   );
