@@ -66,7 +66,7 @@ export const getGalleryImages = async (videoId: string, sectionId: string) => {
 export const clapGalleryImage = async (
   videoId: string,
   sectionId: string,
-  imageUserId: string, // This is the ID of the image document
+  imageUserId: string,
 ) => {
   try {
     const imageRef = doc(
@@ -81,24 +81,23 @@ export const clapGalleryImage = async (
     const imageDoc = await getDoc(imageRef);
 
     if (imageDoc.exists()) {
-      const { clap } = imageDoc.data();
-      await setDoc(imageRef, { clap: (clap || 0) + 1 }, { merge: true });
-
-      // Create notification
+      const { clap, clappedBy = [] } = imageDoc.data();
       const currentUser = getCurrentUser();
+
       if (currentUser && !clappedBy.includes(currentUser.uid)) {
         await setDoc(imageRef, { 
-          clap: clap + 1,
+          clap: (clap || 0) + 1,
           clappedBy: [...clappedBy, currentUser.uid]
         }, { merge: true });
-      }
-      if (currentUser && currentUser.uid !== imageUserId) {
-        await createClapNotification(
-          imageUserId, // image owner
-          currentUser.uid, // who clapped
-          imageUserId, // image id
-          "gallery", // new content type
-        );
+
+        if (currentUser.uid !== imageUserId) {
+          await createClapNotification(
+            imageUserId,
+            currentUser.uid,
+            imageUserId,
+            "gallery",
+          );
+        }
       }
     }
   } catch (error) {
