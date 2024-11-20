@@ -3,6 +3,7 @@ import { collection, doc, setDoc, getDocs, getDoc } from "firebase/firestore";
 import { db } from "../config/firebase";
 import { createClapNotification } from "../services/notification";
 import { getCurrentUser } from "../services/auth";
+import { getUser, UserDto } from "./users.ts";
 
 export interface GalleryImage {
   id?: string;
@@ -10,6 +11,7 @@ export interface GalleryImage {
   imageUrl: string;
   timestamp: Date;
   clap: number;
+  clappedBy: string[]; 
 }
 
 // Add an image to a section's gallery
@@ -84,6 +86,12 @@ export const clapGalleryImage = async (
 
       // Create notification
       const currentUser = getCurrentUser();
+      if (currentUser && !clappedBy.includes(currentUser.uid)) {
+        await setDoc(imageRef, { 
+          clap: clap + 1,
+          clappedBy: [...clappedBy, currentUser.uid]
+        }, { merge: true });
+      }
       if (currentUser && currentUser.uid !== imageUserId) {
         await createClapNotification(
           imageUserId, // image owner
@@ -97,4 +105,17 @@ export const clapGalleryImage = async (
     console.error("Error clapping gallery image:", error);
     throw error;
   }
+};
+
+export const getGalleryClappedUsers = async (
+  videoId: string,
+  sectionId: string,
+  imageUserId: string
+): Promise<UserDto[]> => {
+  const imageDoc = await getDoc(
+    doc(db, "videos", videoId, "sections", sectionId, "gallery", imageUserId)
+  );
+  const clappedByIds = imageDoc.data()?.clappedBy || [];
+  const users = await Promise.all(clappedByIds.map(id => getUser(id)));
+  return users;
 };
