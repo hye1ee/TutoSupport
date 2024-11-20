@@ -6,7 +6,6 @@ import {
   DocumentData,
 } from "firebase/firestore";
 import { db } from "../config/firebase.ts";
-import { User } from "firebase/auth";
 
 export interface UserDto {
   userId: string;
@@ -28,7 +27,7 @@ export const createUser = async (userData: UserDto) => {
 export const getUser = async (userId: string): Promise<UserDto> => {
   try {
     const userDoc = (await getDoc(
-      doc(db, "users", userId),
+      doc(db, "users", userId)
     )) as DocumentSnapshot<UserDto, DocumentData>;
 
     if (userDoc.exists()) {

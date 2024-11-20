@@ -63,7 +63,7 @@ export default function Header() {
           text={user ? `Welcome back, ${user.name}` : "Please Login First!"}
         />
         <img
-          style={{ width: "auto", height: "40px" }}
+          style={{ width: "auto", height: "40px", borderRadius: "40px" }}
           src={user?.profile ?? "/images/Icon_user.png"}
         />
         <BubbleBox

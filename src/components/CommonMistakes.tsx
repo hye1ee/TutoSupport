@@ -28,11 +28,11 @@ export default function CommonMistakes(props: CommonMistakesProps) {
             mistake={thread.comment.content}
             solution={
               thread.replies.length > 0
-                ? thread.replies[0].content
-                : "You should really try doing this instead of that"
+                ? thread.replies.filter((reply) => reply.isPinned)[0].content
+                : "You should try this instead of that"
             }
-            clap={thread.comment.clap}
             imgUrl={thread.comment.img}
+            clap={thread.comment.clap}
             setSelectedTag={props.setSelectedTag}
           />
         ))}
@@ -67,7 +67,7 @@ const Mistake = ({
     <MistakeWrapper
       onClick={() => setSelectedTag && setSelectedTag("mistakes")}
     >
-      {imgUrl && (
+      {imgUrl && imgUrl.length > 0 && (
         <img
           style={{
             height: "100%",
@@ -78,6 +78,7 @@ const Mistake = ({
           src={imgUrl ?? "/images/Icon_img.png"}
         />
       )}
+
       <div
         style={{
           flex: 1,
