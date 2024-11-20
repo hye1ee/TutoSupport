@@ -2,6 +2,7 @@ import { useNavigate } from "react-router-dom";
 import styled from "styled-components";
 import { getCurrentUser, logOut, signInWithGoogle } from "../services/auth";
 import { useEffect, useState } from "react";
+import { BiInfoCircle } from "react-icons/bi";
 
 interface UserInfo {
   name: string;
@@ -14,23 +15,42 @@ export default function Header() {
 
   useEffect(() => {
     const asyncWrapper = async () => {
-      const prevUser = await getCurrentUser();
+      const prevUser = getCurrentUser();
       if (prevUser) {
         const name = prevUser.displayName;
         if (!name) logOut();
         else setUser({ name, profile: prevUser.photoURL });
       }
     };
-    asyncWrapper();
+    setTimeout(() => {
+      // wait for setting the firebase auth
+      asyncWrapper();
+    }, 1000);
   }, []);
 
   return (
     <HeaderWrapper>
-      <img
-        style={{ width: "auto", height: "36px", cursor: "pointer" }}
-        src="/images/Icon_logo.png"
-        onClick={() => navigate("/")}
-      />
+      <div
+        style={{
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          gap: "8px",
+        }}
+      >
+        <img
+          style={{ width: "auto", height: "36px", cursor: "pointer" }}
+          src="/images/Icon_logo.png"
+          onClick={() => navigate("/")}
+        />
+        <BiInfoCircle
+          onClick={() => navigate("/info")}
+          style={{ cursor: "pointer" }}
+          size={24}
+          color="#584A54"
+        />
+      </div>
+
       <div
         style={{
           display: "flex",

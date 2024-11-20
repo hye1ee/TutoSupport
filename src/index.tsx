@@ -6,6 +6,7 @@ import "./index.css";
 import Root from "./pages/Root.tsx";
 import Watch from "./pages/Watch.tsx";
 import Home from "./pages/Home.tsx";
+import Description from "./pages/Description.tsx";
 
 const router = createBrowserRouter([
   {
@@ -15,6 +16,10 @@ const router = createBrowserRouter([
       {
         path: "/",
         element: <Home />,
+      },
+      {
+        path: "/info",
+        element: <Description />,
       },
 
       {
