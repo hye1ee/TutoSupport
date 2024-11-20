@@ -212,40 +212,27 @@ export const clapComment = async (
   commentId: string
 ) => {
   try {
-    // const videoId = encodeURIComponent(videoId);
-    const commentRef = doc(
-      db,
-      "videos",
-      videoId,
-      "sections",
-      sectionId,
-      "comments",
-      commentId
-    );
+    const commentRef = doc(db, "videos", videoId, "sections", sectionId, "comments", commentId);
     const commentDoc = await getDoc(commentRef);
 
     if (commentDoc.exists()) {
-      const { clap, userId } = commentDoc.data();
-      await setDoc(commentRef, { clap: clap + 1 }, { merge: true });
-
-      // Create notification for the comment owner
-      // Get current user ID from auth
+      const { clap, userId, clappedBy = [] } = commentDoc.data();
       const currentUser = getCurrentUser();
 
       if (currentUser && !clappedBy.includes(currentUser.uid)) {
         await setDoc(commentRef, { 
           clap: clap + 1,
           clappedBy: [...clappedBy, currentUser.uid]
-        }, { merge: true });}
-      
-      if (currentUser && currentUser.uid !== userId) {
-        // Don't notify if user claps their own comment
-        await createClapNotification(
-          userId, // Comment owner
-          currentUser.uid, // User who clapped
-          commentId,
-          "comment"
-        );
+        }, { merge: true });
+
+        if (currentUser.uid !== userId) {
+          await createClapNotification(
+            userId,
+            currentUser.uid,
+            commentId,
+            "comment"
+          );
+        }
       }
     } else {
       throw new Error("Comment not found");
@@ -264,7 +251,6 @@ export const clapReply = async (
   replyId: string
 ) => {
   try {
-    // const videoId = encodeURIComponent(videoId);
     const replyRef = doc(
       db,
       "videos",
@@ -279,23 +265,18 @@ export const clapReply = async (
 
     const replyDoc = await getDoc(replyRef);
     if (replyDoc.exists()) {
-      const { clap, userId } = replyDoc.data();
-      await setDoc(replyRef, { clap: clap + 1 }, { merge: true });
-
-      // Create notification for the reply owner
+      const { clap, userId, clappedBy = [] } = replyDoc.data();
       const currentUser = getCurrentUser();
 
       if (currentUser && !clappedBy.includes(currentUser.uid)) {
         await setDoc(replyRef, { 
           clap: clap + 1,
           clappedBy: [...clappedBy, currentUser.uid]
-        }, { merge: true });}
+        }, { merge: true });
 
-
-
-
-      if (currentUser && currentUser.uid !== userId) {
-        await createClapNotification(userId, currentUser.uid, replyId, "reply");
+        if (currentUser.uid !== userId) {
+          await createClapNotification(userId, currentUser.uid, replyId, "reply");
+        }
       }
     } else {
       throw new Error("Reply not found");
@@ -305,7 +286,6 @@ export const clapReply = async (
     throw error;
   }
 };
-
 
 export const getClappedUsers = async (
   videoId: string,
