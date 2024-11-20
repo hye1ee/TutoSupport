@@ -5,6 +5,7 @@ import { useEffect, useState } from "react";
 import {
   clapGalleryImage,
   GalleryImage,
+  getGalleryClappedUsers,
   getGalleryImages,
 } from "../apis/gallery";
 import GalleryUploadModal from "./GalleryUploadModal";
@@ -24,6 +25,7 @@ export default function Gallery({
   title?: string;
 }) {
   const [images, setImages] = useState<GalleryImage[]>([]);
+  const [claps, setClaps] = useState<boolean[]>();
   const [upload, setUpload] = useState<boolean>(false);
   const [userId, setUserId] = useState<string | null>(null);
 
@@ -44,6 +46,21 @@ export default function Gallery({
     );
     return () => unsubscribe();
   }, [sectionId]);
+
+  // useEffect(() => {
+  //   // when images are updated, update claps too
+  //   const asyncWrapper = async () => {
+  //     const promises = images.map(async (img) => {
+  //       const response = await getGalleryClappedUsers(
+  //         videoId,
+  //         sectionId,
+  //         img.userId
+  //       ); // API 호출
+  //       return response; // 반환값
+  //     });
+  //   };
+  //   asyncWrapper();
+  // }, [images]);
 
   useEffect(() => {
     const asyncWrapper = async () => {

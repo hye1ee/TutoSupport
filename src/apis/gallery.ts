@@ -11,7 +11,7 @@ export interface GalleryImage {
   imageUrl: string;
   timestamp: Date;
   clap: number;
-  clappedBy: string[]; 
+  clappedBy: string[];
 }
 
 // Add an image to a section's gallery
@@ -85,10 +85,14 @@ export const clapGalleryImage = async (
       const currentUser = getCurrentUser();
 
       if (currentUser && !clappedBy.includes(currentUser.uid)) {
-        await setDoc(imageRef, { 
-          clap: (clap || 0) + 1,
-          clappedBy: [...clappedBy, currentUser.uid]
-        }, { merge: true });
+        await setDoc(
+          imageRef,
+          {
+            clap: (clap || 0) + 1,
+            clappedBy: [...clappedBy, currentUser.uid],
+          },
+          { merge: true },
+        );
 
         if (currentUser.uid !== imageUserId) {
           await createClapNotification(
@@ -109,12 +113,14 @@ export const clapGalleryImage = async (
 export const getGalleryClappedUsers = async (
   videoId: string,
   sectionId: string,
-  imageUserId: string
+  imageUserId: string,
 ): Promise<UserDto[]> => {
   const imageDoc = await getDoc(
-    doc(db, "videos", videoId, "sections", sectionId, "gallery", imageUserId)
+    doc(db, "videos", videoId, "sections", sectionId, "gallery", imageUserId),
   );
   const clappedByIds = imageDoc.data()?.clappedBy || [];
-  const users = await Promise.all(clappedByIds.map(id => getUser(id)));
+  const users = await Promise.all(
+    clappedByIds.map((id: string) => getUser(id)),
+  );
   return users;
 };

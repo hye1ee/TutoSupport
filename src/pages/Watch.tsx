@@ -9,7 +9,15 @@ import { getComments, ReplyDto, ThreadDto } from "../apis/comments";
 import { getSections, SectionData } from "../apis/sections";
 import { getVideoById, VideoData } from "../apis/videos";
 import { db } from "../config/firebase";
-import { doc, onSnapshot } from "firebase/firestore";
+import {
+  collection,
+  collectionGroup,
+  doc,
+  onSnapshot,
+  query,
+  Unsubscribe,
+  where,
+} from "firebase/firestore";
 
 import Timeline from "../components/Timeline";
 import Video from "../components/Video";
@@ -19,6 +27,8 @@ import Gallery from "../components/Gallery";
 import CommentInput from "../components/CommentInput";
 import Thread from "../components/Thread";
 import TagButton from "../components/TagButton";
+import Encourage from "../components/Encourage";
+import { getCurrentUser } from "../services/auth";
 
 export default function Watch() {
   const videoId = useParams().watchId as string;
@@ -171,8 +181,52 @@ export default function Watch() {
     }
   };
 
+  // gallery clap
+  useEffect(() => {
+    const unsubs = sections.map((_section, idx) => {
+      const sectionId = (idx + 1).toString();
+      return onSnapshot(
+        collection(db, "videos", videoId, "sections", sectionId, "gallery"),
+        (snapshot) => {
+          snapshot.docChanges().forEach((change) => {
+            const data = change.doc.data();
+            const user = getCurrentUser();
+
+            console.log("changed data", data, user);
+            if (user && data.userId === user.uid) {
+              setEncourage([sectionId, data.clap]);
+            }
+          });
+        }
+      );
+    });
+
+    return () => unsubs.forEach((unsub) => unsub());
+  }, [sections]);
+
+  const [encourage, setEncourage] = useState<number[] | null>(null);
+  const [confetti, setConfetti] = useState<boolean>(false);
+  useEffect(() => {
+    if (encourage) {
+      setConfetti(true);
+      setTimeout(() => {
+        setTimeout(() => {
+          setEncourage(null);
+        }, 1000);
+        setConfetti(false);
+      }, 5000);
+    }
+  }, [encourage]);
+
   return (
     <PageWrapper>
+      {encourage && (
+        <Encourage
+          run={confetti}
+          sectionId={encourage[0].toString()}
+          clap={encourage[1]}
+        />
+      )}
       <VideoWrapper>
         <div
           style={{

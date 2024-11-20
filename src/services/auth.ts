@@ -40,7 +40,6 @@ export const logOut = async () => {
 
 export const getCurrentUser = () => {
   const user = auth.currentUser;
-  console.log("Current user:", user);
   return user;
 };
 
