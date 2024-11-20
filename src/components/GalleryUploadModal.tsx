@@ -29,6 +29,7 @@ export default function GalleryUploadModal(props: GalleryUploadModalProps) {
           imageUrl,
           timestamp: new Date(),
           clap: 0,
+          clappedBy: [],
         });
       } catch (error) {
         console.error("Image upload failed:", error);

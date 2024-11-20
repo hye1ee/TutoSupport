@@ -1,13 +1,6 @@
-import { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
 import styled from "styled-components";
-import { getAllVideos } from "../apis/videos";
 
 export default function Description() {
-  const navigate = useNavigate();
-
-  useEffect(() => {}, []);
-
   return (
     <PageWrapper>
       <h1>TutoSupport</h1>

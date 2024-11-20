@@ -1,4 +1,3 @@
-import { useEffect } from "react";
 import Confetti from "react-confetti";
 import styled from "styled-components";
 

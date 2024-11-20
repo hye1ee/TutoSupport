@@ -46,7 +46,7 @@ export const handleAdd = async (
   videoId: string,
   sectionId: string,
   commentData: ExtendedCommentDto,
-  parentCommentId?: string
+  parentCommentId?: string,
 ) => {
   if (parentCommentId) {
     return await addReply(videoId, sectionId, parentCommentId, commentData);
@@ -58,7 +58,7 @@ export const handleAdd = async (
 export const addComment = async (
   videoId: string,
   sectionId: string,
-  commentData: ExtendedCommentDto
+  commentData: ExtendedCommentDto,
 ) => {
   try {
     // const videoId = encodeURIComponent(videoId);
@@ -68,7 +68,7 @@ export const addComment = async (
       videoId,
       "sections",
       sectionId,
-      "comments"
+      "comments",
     );
     const docRef = await addDoc(commentsRef, commentData);
     return docRef.id;
@@ -82,7 +82,7 @@ export const addReply = async (
   videoId: string,
   sectionId: string,
   commentId: string,
-  replyData: CommentDto
+  replyData: CommentDto,
 ) => {
   try {
     // const videoId = encodeURIComponent(videoId);
@@ -94,7 +94,7 @@ export const addReply = async (
       sectionId,
       "comments",
       commentId,
-      "replies"
+      "replies",
     );
     // Ensure isPinned is set to false by default
     const replyWithDefaults: ReplyDto = {
@@ -114,7 +114,7 @@ export const toggleReplyPin = async (
   videoId: string,
   sectionId: string,
   commentId: string,
-  replyId: string
+  replyId: string,
 ) => {
   try {
     // const videoId = encodeURIComponent(videoId);
@@ -127,7 +127,7 @@ export const toggleReplyPin = async (
       "comments",
       commentId,
       "replies",
-      replyId
+      replyId,
     );
 
     const replyDoc = await getDoc(replyRef);
@@ -146,12 +146,12 @@ export const toggleReplyPin = async (
 
 export const getComments = async (
   videoId: string,
-  sectionId: string
+  sectionId: string,
 ): Promise<ThreadDto[]> => {
   try {
     // const videoId = encodeURIComponent(videoId);
     const commentsSnapshot = (await getDocs(
-      collection(db, "videos", videoId, "sections", sectionId, "comments")
+      collection(db, "videos", videoId, "sections", sectionId, "comments"),
     )) as QuerySnapshot<ExtendedCommentDto, DocumentData>;
 
     const threads = await Promise.all(
@@ -166,10 +166,10 @@ export const getComments = async (
               sectionId,
               "comments",
               doc.id,
-              "replies"
+              "replies",
             ),
-            orderBy("timestamp")
-          )
+            orderBy("timestamp"),
+          ),
         )) as QuerySnapshot<ReplyDto, DocumentData>;
 
         // get user info for comments
@@ -195,7 +195,7 @@ export const getComments = async (
           replies: replies,
           isReplyPinned: replies.length != 0 ? replies[0].isPinned : false,
         } as ThreadDto;
-      })
+      }),
     );
 
     return threads;
@@ -209,10 +209,18 @@ export const getComments = async (
 export const clapComment = async (
   videoId: string,
   sectionId: string,
-  commentId: string
+  commentId: string,
 ) => {
   try {
-    const commentRef = doc(db, "videos", videoId, "sections", sectionId, "comments", commentId);
+    const commentRef = doc(
+      db,
+      "videos",
+      videoId,
+      "sections",
+      sectionId,
+      "comments",
+      commentId,
+    );
     const commentDoc = await getDoc(commentRef);
 
     if (commentDoc.exists()) {
@@ -220,17 +228,21 @@ export const clapComment = async (
       const currentUser = getCurrentUser();
 
       if (currentUser && !clappedBy.includes(currentUser.uid)) {
-        await setDoc(commentRef, { 
-          clap: clap + 1,
-          clappedBy: [...clappedBy, currentUser.uid]
-        }, { merge: true });
+        await setDoc(
+          commentRef,
+          {
+            clap: clap + 1,
+            clappedBy: [...clappedBy, currentUser.uid],
+          },
+          { merge: true },
+        );
 
         if (currentUser.uid !== userId) {
           await createClapNotification(
             userId,
             currentUser.uid,
             commentId,
-            "comment"
+            "comment",
           );
         }
       }
@@ -248,7 +260,7 @@ export const clapReply = async (
   videoId: string,
   sectionId: string,
   commentId: string,
-  replyId: string
+  replyId: string,
 ) => {
   try {
     const replyRef = doc(
@@ -260,7 +272,7 @@ export const clapReply = async (
       "comments",
       commentId,
       "replies",
-      replyId
+      replyId,
     );
 
     const replyDoc = await getDoc(replyRef);
@@ -269,13 +281,22 @@ export const clapReply = async (
       const currentUser = getCurrentUser();
 
       if (currentUser && !clappedBy.includes(currentUser.uid)) {
-        await setDoc(replyRef, { 
-          clap: clap + 1,
-          clappedBy: [...clappedBy, currentUser.uid]
-        }, { merge: true });
+        await setDoc(
+          replyRef,
+          {
+            clap: clap + 1,
+            clappedBy: [...clappedBy, currentUser.uid],
+          },
+          { merge: true },
+        );
 
         if (currentUser.uid !== userId) {
-          await createClapNotification(userId, currentUser.uid, replyId, "reply");
+          await createClapNotification(
+            userId,
+            currentUser.uid,
+            replyId,
+            "reply",
+          );
         }
       }
     } else {
@@ -292,19 +313,39 @@ export const getClappedUsers = async (
   sectionId: string,
   commentId: string,
   isReply: boolean = false,
-  replyId?: string
+  replyId?: string,
 ): Promise<UserDto[]> => {
   try {
     let docRef;
     if (isReply && replyId) {
-      docRef = doc(db, "videos", videoId, "sections", sectionId, "comments", commentId, "replies", replyId);
+      docRef = doc(
+        db,
+        "videos",
+        videoId,
+        "sections",
+        sectionId,
+        "comments",
+        commentId,
+        "replies",
+        replyId,
+      );
     } else {
-      docRef = doc(db, "videos", videoId, "sections", sectionId, "comments", commentId);
+      docRef = doc(
+        db,
+        "videos",
+        videoId,
+        "sections",
+        sectionId,
+        "comments",
+        commentId,
+      );
     }
-    
+
     const docSnapshot = await getDoc(docRef);
     const clappedByIds = docSnapshot.data()?.clappedBy || [];
-    const users = await Promise.all(clappedByIds.map(id => getUser(id)));
+    const users = await Promise.all(
+      clappedByIds.map((id: string) => getUser(id)),
+    );
     return users;
   } catch (error) {
     console.error("Error getting clapped users:", error);

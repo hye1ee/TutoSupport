@@ -3,7 +3,6 @@ import { collection, doc, setDoc, getDocs, getDoc } from "firebase/firestore";
 import { db } from "../config/firebase";
 import { createClapNotification } from "../services/notification";
 import { getCurrentUser } from "../services/auth";
-import { getUser, UserDto } from "./users.ts";
 
 export interface GalleryImage {
   id?: string;

@@ -47,6 +47,7 @@ const CommentInput = forwardRef<CommentInputRef, Props>(
         clap: 0,
         userId: "1", // TODO
         user: await getUser("1"), // TODO
+        clappedBy: [],
       };
       if (imageList.length > 0) {
         let src = imageList[0].url as string;

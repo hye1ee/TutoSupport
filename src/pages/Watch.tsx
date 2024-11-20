@@ -5,7 +5,7 @@ import ReactPlayer from "react-player";
 import styled from "styled-components";
 import { Flex } from "antd";
 
-import { CommentDto, getComments, ReplyDto, ThreadDto } from "../apis/comments";
+import { getComments, ReplyDto, ThreadDto } from "../apis/comments";
 import { getSections, SectionData } from "../apis/sections";
 import { getVideoById, VideoData } from "../apis/videos";
 import { db } from "../config/firebase";
@@ -143,6 +143,9 @@ export default function Watch() {
         console.log(comments);
         setThreads(comments);
         // setThreads(threadsExample);
+
+        //TODO) set common mistakes
+        setMistakes([]);
       }
     }
     fetchComments();
@@ -188,6 +191,7 @@ export default function Watch() {
   }
 
   const [recommend, setRecommend] = useState<Recommend | null>(null);
+  const [mistakes, setMistakes] = useState<ThreadDto[]>([]);
 
   const onRecommendation = (currTime: number) => {
     const prevSection = getSectionIdx(currTime);
@@ -294,9 +298,9 @@ export default function Watch() {
                   />
                 </VideoDim>
               ) : (
-                !isHover && (
+                isHover && (
                   <VideoDim>
-                    <CommonMistakes sectionId={sectionIdx} />
+                    <CommonMistakes threads={mistakes} sectionId={sectionIdx} />
                   </VideoDim>
                 )
               ))}
