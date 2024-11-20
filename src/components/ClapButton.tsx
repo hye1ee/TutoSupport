@@ -1,7 +1,7 @@
 import { Button } from "antd";
 import { ClapFalseIcon, ClapTrueIcon } from "../assets/clap";
 import { useState } from "react";
-import { clapComment, handleClapCommentReply } from "../apis/comments";
+import { handleClapCommentReply } from "../apis/comments";
 import { getCurrentUser } from "../services/auth";
 
 interface ClapButtonProps {
@@ -31,7 +31,7 @@ const ClapButton: React.FC<ClapButtonProps> = (props) => {
       props.videoId,
       props.sectionId,
       props.commentId,
-      props.parentCommentId,
+      props.parentCommentId
     );
     setClapped(!prevClapped);
     if (prevClapped) {
@@ -43,6 +43,7 @@ const ClapButton: React.FC<ClapButtonProps> = (props) => {
 
   return (
     <Button
+      key={props.commentId}
       type={clapped ? "primary" : "default"}
       shape="round"
       icon={clapped ? <ClapTrueIcon /> : <ClapFalseIcon />}

@@ -1,13 +1,5 @@
 import { CameraOutlined, PlusOutlined } from "@ant-design/icons";
-import {
-  Button,
-  Image,
-  Select,
-  Tag,
-  Upload,
-  UploadFile,
-  UploadProps,
-} from "antd";
+import { Button, Image, Tag, Upload, UploadFile, UploadProps } from "antd";
 import { forwardRef, useImperativeHandle, useRef, useState } from "react";
 import CustomInput from "./CustomInput";
 import { UploadRef } from "antd/es/upload/Upload";
@@ -20,6 +12,7 @@ import {
 } from "../apis/comments";
 import { getUser } from "../apis/users";
 import { getCurrentUser } from "../services/auth";
+import { Timestamp } from "firebase/firestore";
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 interface ExtendedUploadRef<T = any> extends Omit<UploadRef<T>, "upload"> {
@@ -88,13 +81,14 @@ const CommentInput = forwardRef<CommentInputRef, Props>(
       }
       const comment: ExtendedCommentDto = {
         content: commentText,
-        timestamp: new Date(),
+        timestamp: Timestamp.now(),
         clap: 0,
         clapped: false,
         userId: user.userId,
         user: user,
         tag: tag,
         clappedBy: [],
+        parentId: parentCommentId,
       };
       if (imageList.length > 0) {
         let src = imageList[0].url as string;
@@ -111,7 +105,7 @@ const CommentInput = forwardRef<CommentInputRef, Props>(
         videoId,
         sectionId,
         comment,
-        parentCommentId,
+        parentCommentId
       );
       if (result) {
         console.log(comment);
@@ -123,7 +117,11 @@ const CommentInput = forwardRef<CommentInputRef, Props>(
       setTag("");
       inputRef.current?.blur();
       if (parentHandleComment)
-        parentHandleComment({ ...comment, id: result, isPinned: false });
+        parentHandleComment({
+          ...comment,
+          id: result,
+          isPinned: false,
+        });
     };
 
     useImperativeHandle(ref, () => ({
@@ -209,7 +207,7 @@ const CommentInput = forwardRef<CommentInputRef, Props>(
         )}
       </div>
     );
-  },
+  }
 );
 
 export default CommentInput;
