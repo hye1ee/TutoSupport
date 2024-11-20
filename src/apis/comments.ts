@@ -307,9 +307,27 @@ export const clapReply = async (
 };
 
 
-export const getClappedUsers = async (commentId: string): Promise<UserDto[]> => {
-  const commentDoc = await getDoc(doc(db, "comments", commentId));
-  const clappedByIds = commentDoc.data()?.clappedBy || [];
-  const users = await Promise.all(clappedByIds.map(id => getUser(id)));
-  return users;
+export const getClappedUsers = async (
+  videoId: string,
+  sectionId: string,
+  commentId: string,
+  isReply: boolean = false,
+  replyId?: string
+): Promise<UserDto[]> => {
+  try {
+    let docRef;
+    if (isReply && replyId) {
+      docRef = doc(db, "videos", videoId, "sections", sectionId, "comments", commentId, "replies", replyId);
+    } else {
+      docRef = doc(db, "videos", videoId, "sections", sectionId, "comments", commentId);
+    }
+    
+    const docSnapshot = await getDoc(docRef);
+    const clappedByIds = docSnapshot.data()?.clappedBy || [];
+    const users = await Promise.all(clappedByIds.map(id => getUser(id)));
+    return users;
+  } catch (error) {
+    console.error("Error getting clapped users:", error);
+    throw error;
+  }
 };
