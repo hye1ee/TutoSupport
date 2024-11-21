@@ -3,11 +3,15 @@ import { Video } from "../apis/types";
 
 interface Props extends Video {
   onClick: () => void;
+  disabled?: boolean;
 }
 
 export default function VideoThumbnail(props: Props) {
   return (
-    <VideoThumbnailWrapper onClick={props.onClick}>
+    <VideoThumbnailWrapper
+      onClick={props.onClick}
+      style={{ opacity: props.disabled ? "0.5" : "1" }}
+    >
       <VideoClap>
         <img
           style={{ width: "22px", height: "22px" }}

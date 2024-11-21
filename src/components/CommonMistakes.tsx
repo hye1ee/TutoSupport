@@ -23,19 +23,20 @@ export default function CommonMistakes(props: CommonMistakesProps) {
           Stuck? You might have made the following mistakes
         </div>
 
-        {props.threads.map((thread) => (
-          <Mistake
-            mistake={thread.comment.content}
-            solution={
-              thread.replies.length > 0
-                ? thread.replies.filter((reply) => reply.isPinned)[0].content
-                : "You should try this instead of that"
-            }
-            imgUrl={thread.comment.img}
-            clap={thread.comment.clap}
-            setSelectedTag={props.setSelectedTag}
-          />
-        ))}
+        {props.threads.length > 0 &&
+          props.threads.map((thread) => (
+            <Mistake
+              mistake={thread.comment.content}
+              solution={
+                thread.replies.length > 0
+                  ? thread.replies.filter((reply) => reply.isPinned)[0].content
+                  : "You should try this instead of that"
+              }
+              imgUrl={thread.comment.img}
+              clap={thread.comment.clap}
+              setSelectedTag={props.setSelectedTag}
+            />
+          ))}
       </BoardBody>
     </BoardWrapper>
   );
