@@ -28,8 +28,9 @@ export default function CommonMistakes(props: CommonMistakesProps) {
             mistake={thread.comment.content}
             solution={
               thread.replies.length > 0
-                ? thread.replies.filter((reply) => reply.isPinned)[0].content
-                : "You should try this instead of that"
+                ? thread.replies[0].content
+                : // thread.replies.filter((reply) => reply.isPinned)[0].content // TODO
+                  "You should try this instead of that"
             }
             imgUrl={thread.comment.img}
             clap={thread.comment.clap}
