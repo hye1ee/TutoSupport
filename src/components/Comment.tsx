@@ -5,6 +5,7 @@ import { ArrowDownIcon, ArrowUpIcon } from "../assets/arrow";
 import ClapButton from "./ClapButton";
 import CommentInput, { CommentInputRef } from "./CommentInput";
 import { CommentDto, ReplyDto } from "../apis/comments";
+import { PushpinFilled } from "@ant-design/icons";
 
 const { Text } = Typography;
 
@@ -46,7 +47,15 @@ export default function Comment({
       <Avatar onClick={() => navigate("/")}>{comment.user?.email}</Avatar>
 
       <Flex vertical gap={"small"} flex={1}>
-        <Text strong> {comment.user?.email}</Text>
+        <Flex gap={"small"} style={{ alignContent: "center" }}>
+          <Text strong> {comment.user?.email}</Text>
+          {isSubcomment && (
+            <Button type="text" shape="circle" onClick={() => {}} size="small">
+              {/* <PushpinOutlined /> */}
+              <PushpinFilled />
+            </Button>
+          )}
+        </Flex>
         <Text>{comment.content}</Text>
         {comment.img && <Image width={100} src={comment.img} />}
         <Flex gap={"small"}>
