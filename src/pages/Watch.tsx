@@ -148,7 +148,6 @@ export default function Watch() {
     const prevSection = getSectionIdx(currTime);
     const nxtSection = getSectionIdx(currTime + 5);
     if (prevSection < nxtSection) {
-      // TODO) replace threads[0] to the selected thread
       const thread = commentSectionRef.current?.parentGetRecommend();
       if (!thread) {
         return;
@@ -160,7 +159,7 @@ export default function Watch() {
         currTime,
         thread,
       });
-      setTimeout(() => setRecommend(null), 6000);
+      setTimeout(() => setRecommend(null), 10000); // TODO
     }
   };
 

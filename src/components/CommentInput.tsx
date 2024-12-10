@@ -1,4 +1,4 @@
-import { CameraOutlined, PlusOutlined } from "@ant-design/icons";
+import { CameraOutlined, SendOutlined } from "@ant-design/icons";
 import { Button, Image, Tag, Upload, UploadFile, UploadProps } from "antd";
 import { forwardRef, useImperativeHandle, useRef, useState } from "react";
 import CustomInput from "./CustomInput";
@@ -169,7 +169,7 @@ const CommentInput = forwardRef<CommentInputRef, Props>(
               <Button
                 type={"primary"}
                 shape="circle"
-                icon={<PlusOutlined />}
+                icon={<SendOutlined />}
                 size={"small"}
                 onClick={handleComment}
               />
