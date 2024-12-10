@@ -16,6 +16,7 @@ import { BiPlay } from "react-icons/bi";
 interface HallofFameProps {
   videoId: string;
   sectionId: string;
+  onReplay: () => void;
 }
 
 export default function HallofFame(props: HallofFameProps) {
@@ -84,7 +85,7 @@ export default function HallofFame(props: HallofFameProps) {
         <div style={{ color: "white", fontSize: "40px", fontWeight: 800 }}>
           Hall of Fame
         </div>
-        <HeaderDescription>
+        <HeaderDescription onClick={props.onReplay}>
           <BiPlay size={25} />
           Start Tutorial!
         </HeaderDescription>

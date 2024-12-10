@@ -32,7 +32,9 @@ export default function Encourage(props: Props) {
   );
 }
 
-const EncourageWrapper = styled.div<{ run: boolean }>`
+const EncourageWrapper = styled.div.withConfig({
+  shouldForwardProp: (prop) => prop !== "run",
+})<{ run: boolean }>`
   position: absolute;
 
   top: 0;

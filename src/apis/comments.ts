@@ -5,12 +5,10 @@ import {
   addDoc,
   doc,
   getDoc,
-  getDocs,
   DocumentData,
-  QuerySnapshot,
-  orderBy,
-  query,
   Timestamp,
+  FirestoreDataConverter,
+  QueryDocumentSnapshot,
 } from "firebase/firestore";
 import { db } from "../config/firebase.ts";
 import { getCurrentUser } from "../services/auth";
@@ -19,40 +17,40 @@ import { getUser, UserDto } from "./users.ts";
 
 export interface ThreadDto {
   comment: CommentDto;
-  replies: ReplyDto[];
-  isReplyPinned: boolean;
+  replyCount: number;
+  pinnedReply?: CommentDto;
 }
 
-export interface CommentDto {
-  id?: string;
-  parentId?: string;
-  user?: UserDto;
+export interface DBCommentDto {
+  id: string;
+  userId: string;
   content: string;
   img?: string;
   tag?: string; // Optional tag for the comment
   timestamp: Timestamp;
   clap: number;
-  clapped: boolean;
   clappedBy: string[];
-  // clapped: boolean;
+
+  // replies
+  parentId?: string; // parent comment id
+  isPinned?: boolean;
 }
 
-export interface ExtendedCommentDto extends CommentDto {
-  userId: string;
+export interface CommentDto extends DBCommentDto {
+  user: UserDto;
+  clapped: boolean;
 }
 
-export interface ReplyDto extends CommentDto {
-  isPinned: boolean; // Flag for pinned replies
-}
+export const tagOptions = ["questions", "tips", "mistakes"];
 
 export const handleAdd = async (
   videoId: string,
   sectionId: string,
-  commentData: ExtendedCommentDto,
-  parentCommentId?: string
+  commentData: DBCommentDto,
+  parentid?: string
 ) => {
-  if (parentCommentId) {
-    return await addReply(videoId, sectionId, parentCommentId, commentData);
+  if (parentid) {
+    return await addReply(videoId, sectionId, parentid, commentData);
   } else {
     return await addComment(videoId, sectionId, commentData);
   }
@@ -61,7 +59,7 @@ export const handleAdd = async (
 export const addComment = async (
   videoId: string,
   sectionId: string,
-  commentData: ExtendedCommentDto
+  commentData: DBCommentDto
 ) => {
   try {
     // const videoId = encodeURIComponent(videoId);
@@ -85,7 +83,7 @@ export const addReply = async (
   videoId: string,
   sectionId: string,
   commentId: string,
-  replyData: CommentDto
+  replyData: DBCommentDto
 ) => {
   try {
     // const videoId = encodeURIComponent(videoId);
@@ -100,7 +98,7 @@ export const addReply = async (
       "replies"
     );
     // Ensure isPinned is set to false by default
-    const replyWithDefaults: ReplyDto = {
+    const replyWithDefaults: DBCommentDto = {
       ...replyData,
       isPinned: false,
     };
@@ -147,100 +145,17 @@ export const toggleReplyPin = async (
   }
 };
 
-export const getComments = async (
-  videoId: string,
-  sectionId: string
-): Promise<ThreadDto[]> => {
-  try {
-    // const videoId = encodeURIComponent(videoId);
-    const commentsSnapshot = (await getDocs(
-      collection(db, "videos", videoId, "sections", sectionId, "comments")
-    )) as QuerySnapshot<ExtendedCommentDto, DocumentData>;
-
-    const threads = await Promise.all(
-      commentsSnapshot.docs.map(async (doc) => {
-        const repliesSnapshot = (await getDocs(
-          query(
-            collection(
-              db,
-              "videos",
-              videoId,
-              "sections",
-              sectionId,
-              "comments",
-              doc.id,
-              "replies"
-            ),
-            orderBy("timestamp")
-          )
-        )) as QuerySnapshot<ReplyDto, DocumentData>;
-
-        // get user info for comments
-        let userData: UserDto;
-        try {
-          userData = await getUser(doc.data().userId);
-        } catch (error: unknown) {
-          userData = {
-            userId: doc.data().userId,
-            email: "testemail@gmail.com",
-          };
-        }
-
-        const currentUser = getCurrentUser();
-
-        // Sort replies to show pinned replies first
-        const replies: ReplyDto[] = repliesSnapshot.docs
-          .map((replyDoc) => {
-            return {
-              id: replyDoc.id,
-              parentId: doc.id,
-              ...replyDoc.data(),
-              clapped: currentUser
-                ? replyDoc.data().clappedBy.includes(currentUser.uid)
-                : false,
-            } as ReplyDto;
-          })
-          .sort((a, b) => {
-            // Sort by pinned status first (pinned replies come first)
-            if (a.isPinned && !b.isPinned) return -1;
-            if (!a.isPinned && b.isPinned) return 1;
-            // Then sort by timestamp (newer first)
-            return Number(b.timestamp) - Number(a.timestamp);
-          });
-
-        return {
-          comment: {
-            ...doc.data(),
-            id: doc.id,
-            user: userData,
-            clapped: currentUser
-              ? doc.data().clappedBy.includes(currentUser.uid)
-              : false,
-          }, // Add id: doc.id here
-          replies: replies,
-          isReplyPinned: replies.length != 0 ? replies[0].isPinned : false,
-        } as ThreadDto;
-      })
-    );
-
-    return threads;
-  } catch (error) {
-    console.error("Error getting comments:", error);
-    throw error;
-  }
-};
-
 // handle clap
 export const handleClapCommentReply = async (
   videoId: string,
   sectionId: string,
   commentId: string,
-  parentCommentId?: string
+  parentid?: string
 ) => {
-  if (parentCommentId == null) {
+  if (parentid == null) {
     await clapComment(videoId, sectionId, commentId);
   } else {
-    await clapReply(videoId, sectionId, parentCommentId, commentId);
+    await clapReply(videoId, sectionId, parentid, commentId);
   }
 };
 
@@ -251,7 +166,6 @@ export const clapComment = async (
   commentId: string
 ) => {
   try {
-    console.log("clapComment", videoId, sectionId, commentId);
     const commentRef = doc(
       db,
       "videos",
@@ -364,7 +278,7 @@ export const clapReply = async (
 export const getClappedUsers = async (
   videoId: string,
   sectionId: string,
-  commentId: string,
+  id: string,
   isReply: boolean = false,
   replyId?: string
 ): Promise<UserDto[]> => {
@@ -378,7 +292,7 @@ export const getClappedUsers = async (
         "sections",
         sectionId,
         "comments",
-        commentId,
+        id,
         "replies",
         replyId
       );
@@ -390,7 +304,7 @@ export const getClappedUsers = async (
         "sections",
         sectionId,
         "comments",
-        commentId
+        id
       );
     }
 
@@ -404,4 +318,36 @@ export const getClappedUsers = async (
     console.error("Error getting clapped users:", error);
     throw error;
   }
+};
+
+// Define a FirestoreDataConverter for DBCommentDto
+export const commentConverter: FirestoreDataConverter<DBCommentDto> = {
+  toFirestore(comment: DBCommentDto): DocumentData {
+    return {
+      userId: comment.userId,
+      content: comment.content,
+      timestamp: comment.timestamp,
+      clap: comment.clap,
+      clappedBy: comment.clappedBy,
+      isPinned: comment.isPinned,
+      tag: comment.tag,
+      img: comment.img,
+      parentId: comment.parentId,
+    };
+  },
+  fromFirestore(snapshot: QueryDocumentSnapshot<DocumentData>): DBCommentDto {
+    const data = snapshot.data();
+    return {
+      id: snapshot.id, // The document ID becomes the id
+      userId: data.userId,
+      content: data.content,
+      timestamp: data.timestamp,
+      clap: data.clap,
+      clappedBy: data.clappedBy,
+      isPinned: data.isPinned,
+      tag: data.tag,
+      img: data.img,
+      parentId: data.parentId,
+    };
+  },
 };

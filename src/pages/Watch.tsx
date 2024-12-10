@@ -4,7 +4,6 @@ import ReactPlayer from "react-player";
 
 import styled from "styled-components";
 
-import { ThreadDto } from "../apis/comments";
 import { getSections, SectionData } from "../apis/sections";
 import { getVideoById, VideoData } from "../apis/videos";
 import { db } from "../config/firebase";
@@ -22,6 +21,7 @@ import CommentSection, {
   CommentSectionRef,
 } from "../components/CommentSection";
 import TimelineClassic from "../components/TimelineClassic";
+import { ThreadDto } from "../apis/comments";
 
 export default function Watch() {
   const videoId = useParams().watchId as string;
@@ -76,13 +76,8 @@ export default function Watch() {
     };
 
     async function fetchSections() {
-      // TODO remove, this is for setting
-      // await addSection(videoId, sampleSections[0]);
-      // await addSection(videoId, sampleSections[1]);
-      // await addSection(videoId, sampleSections[2]);
       setVideo((await getVideoById(videoId)) as VideoData);
       const sections = await getSections(videoId);
-      console.log("sections", sections);
       const uniqueSections = sections
         .filter((section, index, self) => {
           return (
@@ -171,7 +166,7 @@ export default function Watch() {
     playerRef?.current?.seekTo(currTime, "seconds");
     setIsPlay(false);
 
-    // TODO) do something to show the comment at top!
+    // show the comment at top!
     if (!recommend || !recommend.thread.comment.id) {
       return;
     }
@@ -190,7 +185,7 @@ export default function Watch() {
             const data = change.doc.data();
             const user = getCurrentUser();
 
-            console.log("changed data", data, user);
+            // console.log("changed data", data, user);
             if (user && data.userId === user.uid) {
               setEncourage([sectionId, data.clap]);
             }
@@ -253,6 +248,7 @@ export default function Watch() {
                   <HallofFame
                     videoId={videoId}
                     sectionId={sections.length.toString()}
+                    onReplay={() => setIsPlay(true)}
                   />
                 </VideoDim>
               ) : (

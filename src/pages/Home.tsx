@@ -15,13 +15,7 @@ export default function Home() {
       setVideo(await getAllVideos());
     };
     asyncWrapper();
-
-    console.log("test");
   }, []);
-
-  useEffect(() => {
-    console.log(video);
-  }, [video]);
 
   return (
     <PageWrapper>

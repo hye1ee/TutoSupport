@@ -23,8 +23,8 @@ export default function Video(props: VideoProps) {
       }}
       onDuration={props.onDuration}
       url={getYoutubeUrl(props.id)}
-      onPause={() => console.log("pause")}
-      onEnded={() => console.log("end")}
+      // onPause={() => console.log("pause")}
+      // onEnded={() => console.log("end")}
       config={{
         youtube: {
           playerVars: { disablekb: 1, showinfo: 0, modestbranding: 1 },

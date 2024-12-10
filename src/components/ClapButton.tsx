@@ -7,11 +7,10 @@ import { useMemo } from "react";
 interface ClapButtonProps {
   videoId: string;
   sectionId: string;
-  commentId: string;
-  parentCommentId?: string;
+  id: string;
+  parentid?: string;
   _clapped: boolean;
   _clap: number;
-  handleClap: () => void;
 }
 
 const ClapButton: React.FC<ClapButtonProps> = (props) => {
@@ -28,17 +27,16 @@ const ClapButton: React.FC<ClapButtonProps> = (props) => {
     await handleClapCommentReply(
       props.videoId,
       props.sectionId,
-      props.commentId,
-      props.parentCommentId
+      props.id,
+      props.parentid
     );
-    props.handleClap();
   };
 
   return (
     <>
       {clapped ? (
         <Button
-          key={props.commentId}
+          key={props.id}
           type={"primary"}
           shape="round"
           icon={<ClapTrueIcon />}
@@ -48,7 +46,7 @@ const ClapButton: React.FC<ClapButtonProps> = (props) => {
         </Button>
       ) : (
         <Button
-          key={props.commentId}
+          key={props.id}
           type={"default"}
           shape="round"
           icon={<ClapFalseIcon />}

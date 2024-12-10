@@ -1,14 +1,28 @@
 import { CameraOutlined, SendOutlined } from "@ant-design/icons";
-import { Button, Image, Tag, Upload, UploadFile, UploadProps } from "antd";
-import { forwardRef, useImperativeHandle, useRef, useState } from "react";
+import {
+  Button,
+  Flex,
+  Image,
+  Select,
+  Upload,
+  UploadFile,
+  UploadProps,
+} from "antd";
+import React, {
+  forwardRef,
+  useImperativeHandle,
+  useRef,
+  useState,
+} from "react";
 import CustomInput from "./CustomInput";
 import { UploadRef } from "antd/es/upload/Upload";
 import RcUpload from "rc-upload";
 import {
+  DBCommentDto,
   // CommentDto,
-  ExtendedCommentDto,
   handleAdd,
-  ReplyDto,
+  CommentDto,
+  tagOptions,
 } from "../apis/comments";
 import { getUser } from "../apis/users";
 import { getCurrentUser } from "../services/auth";
@@ -26,17 +40,15 @@ export interface CommentInputRef {
   focusInput: () => void;
 }
 
-interface Props {
+interface CommentInputProps {
   videoId: string;
   sectionId: string;
-  parentCommentId?: string;
-  parentHandleComment?: (newReply: ReplyDto) => void;
+  parentId?: string;
+  parentHandleComment?: (newReply: CommentDto) => void;
 }
 
-const tagList = ["questions", "tips", "mistakes"];
-
-const CommentInput = forwardRef<CommentInputRef, Props>(
-  ({ videoId, sectionId, parentCommentId, parentHandleComment }, ref) => {
+const CommentInput = forwardRef<CommentInputRef, CommentInputProps>(
+  ({ videoId, sectionId, parentId, parentHandleComment }, ref) => {
     // about tag
     const [tag, setTag] = useState("");
 
@@ -46,16 +58,16 @@ const CommentInput = forwardRef<CommentInputRef, Props>(
     const onCommentChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
       setCommentText(e.target.value);
 
-      if (!tag) {
-        // no tag yet, add tag
-        for (const _tag of tagList) {
-          if (e.target.value.includes("#" + _tag)) {
-            setTag(_tag);
-            const updatedText = e.target.value.replace("#" + _tag, "");
-            setCommentText(updatedText);
-          }
-        }
-      }
+      // if (!tag) {
+      //   // no tag yet, add tag
+      //   for (const _tag of tagList) {
+      //     if (e.target.value.includes("#" + _tag)) {
+      //       setTag(_tag);
+      //       const updatedText = e.target.value.replace("#" + _tag, "");
+      //       setCommentText(updatedText);
+      //     }
+      //   }
+      // }
     };
 
     // about image
@@ -79,18 +91,17 @@ const CommentInput = forwardRef<CommentInputRef, Props>(
         alert("please sign up first");
         return;
       }
-      const comment: ExtendedCommentDto = {
+      const comment: DBCommentDto = {
+        id: "",
         content: commentText,
         timestamp: Timestamp.now(),
-        clap: 0,
-        clapped: false,
         userId: user.userId,
-        user: user,
         tag: tag,
+        clap: 0,
         clappedBy: [],
       };
-      if (parentCommentId) {
-        comment.parentId = parentCommentId;
+      if (parentId) {
+        comment.parentId = parentId;
       }
       if (imageList.length > 0) {
         let src = imageList[0].url as string;
@@ -103,12 +114,7 @@ const CommentInput = forwardRef<CommentInputRef, Props>(
         }
         comment.img = src;
       }
-      const result = await handleAdd(
-        videoId,
-        sectionId,
-        comment,
-        parentCommentId
-      );
+      const result = await handleAdd(videoId, sectionId, comment, parentId);
       if (result) {
         console.log(comment);
       } else {
@@ -116,13 +122,15 @@ const CommentInput = forwardRef<CommentInputRef, Props>(
       }
       setCommentText("");
       setImageList([]);
-      setTag("");
+      setTag("none");
       inputRef.current?.blur();
       if (parentHandleComment)
         parentHandleComment({
           ...comment,
           id: result,
           isPinned: false,
+          clapped: false,
+          user: user,
         });
     };
 
@@ -156,32 +164,68 @@ const CommentInput = forwardRef<CommentInputRef, Props>(
           value={commentText}
           placeholder="Add a comment"
           suffix={
-            <>
-              <Button
-                type={"text"}
-                shape="circle"
-                icon={<CameraOutlined />}
-                size="middle"
-                onClick={(e) => {
-                  uploadRef.current?.upload?.uploader?.onClick(e);
-                }}
-              />
-              <Button
-                type={"primary"}
-                shape="circle"
-                icon={<SendOutlined />}
-                size={"small"}
-                onClick={handleComment}
-              />
-            </>
+            <React.Fragment>
+              {parentId && (
+                <>
+                  <Button
+                    type={"text"}
+                    shape="circle"
+                    icon={<CameraOutlined />}
+                    size="middle"
+                    onClick={(e) => {
+                      uploadRef.current?.upload?.uploader?.onClick(e);
+                    }}
+                  />
+                  <Button
+                    type={"primary"}
+                    shape="circle"
+                    icon={<SendOutlined style={{ marginLeft: "2px" }} />}
+                    size={"small"}
+                    onClick={handleComment}
+                  />
+                </>
+              )}
+            </React.Fragment>
           }
           onChange={onCommentChange}
         ></CustomInput>
 
-        {tag && (
-          <Tag closeIcon onClose={() => setTag("")}>
-            {tag}
-          </Tag>
+        {!parentId && (
+          <Flex
+            gap={"big"}
+            style={{
+              justifyContent: "flex-end",
+              alignItems: "center",
+              gap: "1em",
+            }}
+          >
+            <Select
+              defaultValue={"none"}
+              value={tag}
+              style={{ width: 80 }}
+              onChange={setTag}
+              options={["none", ...tagOptions].map((tag: string) => ({
+                label: tag,
+                value: tag,
+              }))}
+            />
+            <Button
+              type={"text"}
+              shape="circle"
+              icon={<CameraOutlined />}
+              size="middle"
+              onClick={(e) => {
+                uploadRef.current?.upload?.uploader?.onClick(e);
+              }}
+            />
+            <Button
+              type={"primary"}
+              shape="circle"
+              icon={<SendOutlined style={{ marginLeft: "2px" }} />}
+              size={"small"}
+              onClick={handleComment}
+            />
+          </Flex>
         )}
 
         <Upload
@@ -207,6 +251,8 @@ const CommentInput = forwardRef<CommentInputRef, Props>(
             src={previewSrc}
           />
         )}
+
+        {/* {!parentId && <hr style={{ border: "1px solid #ccc" }} />} */}
       </div>
     );
   }

@@ -27,14 +27,14 @@ export default function CommonMistakes(props: CommonMistakesProps) {
         </div>
 
         {props.threads.length > 0 &&
-          props.threads.map((thread) => (
+          props.threads.map((thread, index) => (
             <Mistake
+              key={index}
               mistake={thread.comment.content}
               solution={
-                thread.replies.length > 0
-                  ? thread.replies[0].content
-                  : // thread.replies.filter((reply) => reply.isPinned)[0].content // TODO
-                    "You should try this instead of that"
+                thread.replyCount > 0 && thread.pinnedReply?.content
+                  ? thread.pinnedReply?.content
+                  : "I think you should buy bettter materials"
               }
               imgUrl={thread.comment.img}
               clap={thread.comment.clap}

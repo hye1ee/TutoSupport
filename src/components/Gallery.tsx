@@ -6,7 +6,6 @@ import {
   clapGalleryImage,
   GalleryImage,
   getGalleryClappedUsers,
-  getGalleryImages,
 } from "../apis/gallery";
 import GalleryUploadModal from "./GalleryUploadModal";
 import { getCurrentUser } from "../services/auth";
@@ -40,12 +39,12 @@ export default function Gallery({
               id: doc.id,
               ...doc.data(),
             };
-          }) as GalleryImage[],
+          }) as GalleryImage[]
         );
-      },
+      }
     );
     return () => unsubscribe();
-  }, [sectionId]);
+  }, [sectionId, videoId]);
 
   useEffect(() => {
     // when images are updated, update claps too
@@ -56,24 +55,17 @@ export default function Gallery({
         const response = await getGalleryClappedUsers(
           videoId,
           sectionId,
-          img.userId,
+          img.userId
         );
         return response.includes(user.uid); // 반환값
       });
       setClaps((await Promise.all(promises)) as boolean[]);
     };
     asyncWrapper();
-  }, [images]);
+  }, [videoId, sectionId, images]);
 
-  useEffect(() => {
-    const asyncWrapper = async () => {
-      setImages((await getGalleryImages(videoId, sectionId)) as GalleryImage[]);
-    };
-    asyncWrapper();
-  }, [sectionId]);
-
-  const clapImage = (imageId: string) => () => {
-    clapGalleryImage(videoId, sectionId, imageId);
+  const clapImage = async (imageId?: string) => {
+    await clapGalleryImage(videoId, sectionId, imageId as string);
   };
 
   const onUploadClick = async () => {
@@ -154,9 +146,9 @@ export default function Gallery({
                   url={image.imageUrl}
                   value={image.clap}
                   onClicked={claps ? claps[index] : false}
-                  onClick={clapImage(image.id)}
+                  onClick={() => clapImage(image.id)}
                 />
-              ),
+              )
           )}
         </GalleryItemScroller>
       </GalleryItemWrapper>

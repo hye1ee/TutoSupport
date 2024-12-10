@@ -9,7 +9,6 @@
   border-radius: 100px;
 }
 
-
 /* .comment-section::-webkit-scrollbar-thumb {
   background-color: rgba(254, 245, 239, 0.5);
   background-color:red;
@@ -70,4 +69,16 @@ body,
   flex: 1;
 
   overflow: hidden;
+}
+
+svg {
+  vertical-align: baseline;
+}
+
+.anticon-pushpin {
+  margin-bottom: 3px;
+}
+
+button .anticon-pushpin {
+  margin-bottom: 0px;
 }

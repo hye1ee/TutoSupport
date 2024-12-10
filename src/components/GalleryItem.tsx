@@ -7,7 +7,7 @@ interface Props {
   url: string;
   value: number;
   onClicked: boolean;
-  onClick: () => void;
+  onClick: () => Promise<void>;
 }
 
 const StyledContainer = styled.div<{ $small: boolean }>`
@@ -32,7 +32,9 @@ const StyledImage = styled.img`
   object-fit: cover; /* 찌그러지지 않고 꽉 차게 */
 `;
 
-const StyledClapButton = styled.button<{ onClicked: boolean }>`
+const StyledClapButton = styled.button.withConfig({
+  shouldForwardProp: (prop) => prop !== "onClicked",
+})<{ onClicked: boolean }>`
   position: absolute;
   bottom: 14px;
   right: 10px;
@@ -69,10 +71,10 @@ const GalleryItem: React.FC<Props> = ({
   onClick,
   small,
 }) => {
-  const onClap = () => {
+  const onClap = async () => {
     const user = getCurrentUser();
     if (!user) window.alert("Please login first");
-    else if (!onClicked) onClick();
+    else if (!onClicked) await onClick();
   };
 
   return (

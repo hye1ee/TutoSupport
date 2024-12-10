@@ -3,7 +3,6 @@ import { collection, doc, setDoc, getDocs, getDoc } from "firebase/firestore";
 import { db } from "../config/firebase";
 import { createClapNotification } from "../services/notification";
 import { getCurrentUser } from "../services/auth";
-import { getUser } from "./users";
 
 export interface GalleryImage {
   id?: string;
@@ -18,7 +17,7 @@ export interface GalleryImage {
 export const addGalleryImage = async (
   videoId: string,
   sectionId: string,
-  imageData: GalleryImage,
+  imageData: GalleryImage
 ) => {
   try {
     // Use userId as document ID to ensure one image per user
@@ -29,7 +28,7 @@ export const addGalleryImage = async (
       "sections",
       sectionId,
       "gallery",
-      imageData.userId,
+      imageData.userId
     );
 
     await setDoc(galleryRef, imageData);
@@ -49,7 +48,7 @@ export const getGalleryImages = async (videoId: string, sectionId: string) => {
       videoId,
       "sections",
       sectionId,
-      "gallery",
+      "gallery"
     );
 
     const gallerySnapshot = await getDocs(galleryRef);
@@ -66,7 +65,7 @@ export const getGalleryImages = async (videoId: string, sectionId: string) => {
 export const clapGalleryImage = async (
   videoId: string,
   sectionId: string,
-  imageUserId: string, // This is the ID of the image document
+  imageUserId: string // This is the ID of the image document
 ) => {
   try {
     const imageRef = doc(
@@ -76,7 +75,7 @@ export const clapGalleryImage = async (
       "sections",
       sectionId,
       "gallery",
-      imageUserId,
+      imageUserId
     );
     const imageDoc = await getDoc(imageRef);
 
@@ -91,7 +90,7 @@ export const clapGalleryImage = async (
             clap: clap + 1,
             clappedBy: [...clappedBy, currentUser.uid],
           },
-          { merge: true },
+          { merge: true }
         );
       }
       if (currentUser && currentUser.uid !== imageUserId) {
@@ -99,7 +98,7 @@ export const clapGalleryImage = async (
           imageUserId, // image owner
           currentUser.uid, // who clapped
           imageUserId, // image id
-          "gallery", // new content type
+          "gallery" // new content type
         );
       }
     }
@@ -112,14 +111,11 @@ export const clapGalleryImage = async (
 export const getGalleryClappedUsers = async (
   videoId: string,
   sectionId: string,
-  imageUserId: string,
+  imageUserId: string
 ): Promise<string[]> => {
   const imageDoc = await getDoc(
-    doc(db, "videos", videoId, "sections", sectionId, "gallery", imageUserId),
+    doc(db, "videos", videoId, "sections", sectionId, "gallery", imageUserId)
   );
   const clappedByIds = imageDoc.data()?.clappedBy || [];
-  const users = await Promise.all(
-    clappedByIds.map((id: string) => getUser(id)),
-  );
-  return users;
+  return clappedByIds;
 };

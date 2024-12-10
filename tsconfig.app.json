@@ -22,5 +22,12 @@
     "noFallthroughCasesInSwitch": true,
     "noUncheckedSideEffectImports": true
   },
-  "include": ["src"]
+  "include": [
+    "src",
+    "src/utils/initData/comments",
+    "src/utils/initData/initComments.ts",
+    "src/utils/initData/initData.ts",
+    "src/utils/initData/initSections.ts",
+    "src/utils/initData/initUsers.ts"
+  ]
 }

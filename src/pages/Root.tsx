@@ -33,6 +33,12 @@ export default function Root() {
           Input: {
             borderRadius: 20,
           },
+          Select: {
+            fontSize: 10,
+            fontFamily: "Nunito",
+            optionFontSize: 10,
+            optionHeight: 20,
+          },
         },
       }}
     >

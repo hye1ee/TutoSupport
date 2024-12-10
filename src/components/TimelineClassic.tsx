@@ -167,7 +167,9 @@ const TimelinePreview = styled.div`
   opacity: 0.7;
 `;
 
-const PreviewTime = styled.div<{ left: boolean }>`
+const PreviewTime = styled.div.withConfig({
+  shouldForwardProp: (prop) => prop !== "left",
+})<{ left: boolean }>`
   position: absolute;
   ${(props) => (props.left ? "left: 10px;" : "right: 10px;")}
   top: 50%;
