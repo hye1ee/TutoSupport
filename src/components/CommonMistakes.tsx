@@ -1,10 +1,12 @@
 import styled from "styled-components";
 import { ThreadDto } from "../apis/comments";
+import { BiPlay } from "react-icons/bi";
 
 interface CommonMistakesProps {
   sectionId: number;
   threads: ThreadDto[];
   setSelectedTag?: (selectedTag: string) => void;
+  onReplay: () => void;
 }
 
 export default function CommonMistakes(props: CommonMistakesProps) {
@@ -14,8 +16,9 @@ export default function CommonMistakes(props: CommonMistakesProps) {
         <div style={{ color: "white", fontSize: "40px", fontWeight: 800 }}>
           Common Mistakes
         </div>
-        <HeaderDescription>
-          Hover the outside of screen to watch the video
+        <HeaderDescription onClick={props.onReplay}>
+          <BiPlay size={25} />
+          Click to Replay
         </HeaderDescription>
       </BoardHeader>
       <BoardBody>
@@ -230,7 +233,14 @@ const HeaderDescription = styled.div`
   font-weight: 700;
 
   box-sizing: border-box;
-  padding: 8px 20px;
+  padding: 12px 20px;
 
   border-radius: 100px;
+  cursor: pointer;
+  font-size: 18px;
+
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
 `;

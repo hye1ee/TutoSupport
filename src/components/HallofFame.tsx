@@ -11,6 +11,7 @@ import { HashLoader } from "react-spinners";
 import { collection, onSnapshot } from "firebase/firestore";
 import { db } from "../config/firebase";
 import { getCurrentUser } from "../services/auth";
+import { BiPlay } from "react-icons/bi";
 
 interface HallofFameProps {
   videoId: string;
@@ -30,7 +31,7 @@ export default function HallofFame(props: HallofFameProps) {
         const response = await getGalleryClappedUsers(
           props.videoId,
           props.sectionId,
-          img.userId,
+          img.userId
         );
         return response.includes(user.uid); // 반환값
       });
@@ -48,7 +49,7 @@ export default function HallofFame(props: HallofFameProps) {
         props.videoId,
         "sections",
         props.sectionId,
-        "gallery",
+        "gallery"
       ),
       (snapshot) => {
         setImages(
@@ -57,9 +58,9 @@ export default function HallofFame(props: HallofFameProps) {
               id: doc.id,
               ...doc.data(),
             };
-          }) as GalleryImage[],
+          }) as GalleryImage[]
         );
-      },
+      }
     );
     return () => unsubscribe();
   }, [props.sectionId]);
@@ -84,23 +85,30 @@ export default function HallofFame(props: HallofFameProps) {
           Hall of Fame
         </div>
         <HeaderDescription>
-          Press a space bar to start tutorial
+          <BiPlay size={25} />
+          Start Tutorial!
         </HeaderDescription>
       </BoardHeader>
-      <BoardItemWrapper>
-        {images.map((image, index) => (
-          <GalleryItem
-            key={index}
-            url={image.imageUrl}
-            value={image.clap}
-            onClicked={claps ? claps[index] : false}
-            onClick={onItemClick(image.userId)}
-          />
-        ))}
-        {images.length === 0 && (
-          <HashLoader color="#9D5C63" style={{ alignSelf: "center" }} />
-        )}
-      </BoardItemWrapper>
+      <BoardBody>
+        <div style={{ color: "white", fontSize: "20px", fontWeight: 600 }}>
+          Check out the work of others who have completed this tutorial and get
+          inspired!
+        </div>
+        <BoardItemWrapper>
+          {images.map((image, index) => (
+            <GalleryItem
+              key={index}
+              url={image.imageUrl}
+              value={image.clap}
+              onClicked={claps ? claps[index] : false}
+              onClick={onItemClick(image.userId)}
+            />
+          ))}
+          {images.length === 0 && (
+            <HashLoader color="#9D5C63" style={{ alignSelf: "center" }} />
+          )}
+        </BoardItemWrapper>
+      </BoardBody>
     </BoardWrapper>
   );
 }
@@ -127,6 +135,21 @@ const BoardHeader = styled.div`
   justify-content: space-between;
 `;
 
+const BoardBody = styled.div`
+  flex: 1;
+  overflow-y: auto;
+  width: 100%;
+
+  box-sizing: border-box;
+
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: flex-start;
+
+  gap: 16px;
+`;
+
 const HeaderDescription = styled.div`
   width: fit-content;
   height: fit-content;
@@ -138,14 +161,23 @@ const HeaderDescription = styled.div`
   font-weight: 700;
 
   box-sizing: border-box;
-  padding: 8px 20px;
+  padding: 12px 20px;
 
   border-radius: 100px;
+  cursor: pointer;
+  font-size: 18px;
+
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
 `;
 
 const BoardItemWrapper = styled.div`
+  width: 100%;
+  height: fit-content;
+
   margin: 12px 0px;
-  overflow-y: auto;
 
   display: flex;
   flex-direction: row;

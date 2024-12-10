@@ -21,6 +21,7 @@ import Recommendation from "../components/Recommendation";
 import CommentSection, {
   CommentSectionRef,
 } from "../components/CommentSection";
+import TimelineClassic from "../components/TimelineClassic";
 
 export default function Watch() {
   const videoId = useParams().watchId as string;
@@ -145,8 +146,9 @@ export default function Watch() {
   const [mistakes, setMistakes] = useState<ThreadDto[]>([]);
 
   const onRecommendation = (currTime: number) => {
+    if (recommend) return;
     const prevSection = getSectionIdx(currTime);
-    const nxtSection = getSectionIdx(currTime + 5);
+    const nxtSection = getSectionIdx(currTime + 20);
     if (prevSection < nxtSection) {
       const thread = commentSectionRef.current?.parentGetRecommend();
       if (!thread) {
@@ -159,7 +161,7 @@ export default function Watch() {
         currTime,
         thread,
       });
-      setTimeout(() => setRecommend(null), 10000); // TODO
+      setTimeout(() => setRecommend(null), 10000);
     }
   };
 
@@ -257,6 +259,7 @@ export default function Watch() {
                 isHover && (
                   <VideoDim>
                     <CommonMistakes
+                      onReplay={() => setIsPlay(true)}
                       threads={mistakes}
                       sectionId={sectionIdx}
                       setSelectedTag={
@@ -266,7 +269,7 @@ export default function Watch() {
                   </VideoDim>
                 )
               ))}
-            <VideoEvtWrapper>
+            <VideoEvtWrapper onClick={() => setIsPlay(false)}>
               <Video
                 playerRef={playerRef}
                 play={isPlay}
@@ -277,6 +280,14 @@ export default function Watch() {
             </VideoEvtWrapper>
           </VideoContainer>
           <Timeline
+            min={0}
+            max={duration}
+            value={time}
+            setValue={setTime}
+            setIsSeeking={setIsSeeking}
+            sections={sections}
+          />
+          <TimelineClassic
             min={0}
             max={duration}
             value={time}
@@ -333,7 +344,7 @@ const VideoWrapper = styled.div`
   /* overflow: hidden; */
 
   padding: 0px 16px;
-  border-right: 1px solid gray;
+  /* border-right: 1px solid beige; */
 
   display: flex;
   flex-direction: column;
