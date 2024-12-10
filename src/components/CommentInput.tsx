@@ -50,7 +50,7 @@ interface CommentInputProps {
 const CommentInput = forwardRef<CommentInputRef, CommentInputProps>(
   ({ videoId, sectionId, parentId, parentHandleComment }, ref) => {
     // about tag
-    const [tag, setTag] = useState("");
+    const [tag, setTag] = useState("none");
 
     // about comment text
     const [commentText, setCommentText] = useState("");
@@ -200,7 +200,6 @@ const CommentInput = forwardRef<CommentInputRef, CommentInputProps>(
             }}
           >
             <Select
-              defaultValue={"none"}
               value={tag}
               style={{ width: 80 }}
               onChange={setTag}
