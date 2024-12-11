@@ -93,7 +93,18 @@ export default function Comment(props: CommentProps) {
                 </Tooltip>
               </div>
             ))}
-          <div style={{ marginLeft: "auto", whiteSpace: "nowrap" }}>
+          <div
+            style={{
+              marginLeft: !(
+                props.isSubcomment &&
+                props.comment.parentId != undefined &&
+                props.isMySubcomment
+              )
+                ? "auto"
+                : "0",
+              whiteSpace: "nowrap",
+            }}
+          >
             <Tooltip placement="top" title={<span>Report this comment</span>}>
               <Button
                 type="text"
