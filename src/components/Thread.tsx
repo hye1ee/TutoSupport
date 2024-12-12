@@ -5,7 +5,7 @@ import {
   DBCommentDto,
   toggleReplyPin,
 } from "../apis/comments";
-import { useEffect, useMemo, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import {
   collection,
   onSnapshot,
@@ -24,10 +24,14 @@ interface ThreadProps {
   comment: CommentDto;
   isPulledUp?: boolean;
   children?: React.ReactElement<Comment>[];
-  setParentThread: (replyCount: number, pinnedReply: CommentDto) => void;
+  setParentThread: (
+    id: string,
+    replyCount: number,
+    pinnedReply?: CommentDto
+  ) => void;
 }
 
-export default function Thread(props: ThreadProps) {
+const Thread = React.memo((props: ThreadProps) => {
   const [replies, setReplies] = useState<CommentDto[]>([]);
   const isMySubcomment = useMemo(
     () => props.comment.userId == getCurrentUser()?.uid,
@@ -100,12 +104,13 @@ export default function Thread(props: ThreadProps) {
         const pinnedReplies = newReplies.filter((reply) => reply.isPinned);
         const pinnedReply =
           pinnedReplies.length > 0 ? pinnedReplies[0] : undefined;
-        if (pinnedReply) props.setParentThread(newReplies.length, pinnedReply);
+        // if (newReplies.length > 0) //TODO
+        props.setParentThread(props.comment.id, newReplies.length, pinnedReply);
       }
     );
 
     return () => unsubscribe();
-  }, [props.videoId, props.sectionId, props.comment.id, props.setParentThread]);
+  }, [props.videoId, props.sectionId, props.comment.id]);
 
   return (
     <Flex
@@ -136,4 +141,6 @@ export default function Thread(props: ThreadProps) {
       </Comment>
     </Flex>
   );
-}
+});
+
+export default Thread;

@@ -162,7 +162,7 @@ const CommentSection = forwardRef<CommentSectionRef, Props>(
 
     // function allowing replies to set up parent thread
     const setParentThread = useCallback(
-      (id: string, replyCount: number, pinnedReply: CommentDto) => {
+      (id: string, replyCount: number, pinnedReply?: CommentDto) => {
         setThreads((prevThreads) =>
           prevThreads.map((thread) =>
             thread.comment.id === id
@@ -210,30 +210,16 @@ const CommentSection = forwardRef<CommentSectionRef, Props>(
                   sectionId={sectionId}
                   comment={pulledUpThread.comment}
                   isPulledUp={true}
-                  setParentThread={(
-                    replyCount: number,
-                    pinnedReply: CommentDto
-                  ) =>
-                    setParentThread(
-                      pulledUpThread.comment.id,
-                      replyCount,
-                      pinnedReply
-                    )
-                  }
+                  setParentThread={setParentThread}
                 />
               )}
-              {filteredThreads.map((thread, index) => (
+              {filteredThreads.map((thread) => (
                 <Thread
-                  key={index}
+                  key={thread.comment.id}
                   videoId={videoId}
                   sectionId={sectionId}
                   comment={thread.comment}
-                  setParentThread={(
-                    replyCount: number,
-                    pinnedReply: CommentDto
-                  ) =>
-                    setParentThread(thread.comment.id, replyCount, pinnedReply)
-                  }
+                  setParentThread={setParentThread}
                 />
               ))}
             </CommentsAreaWrapper>

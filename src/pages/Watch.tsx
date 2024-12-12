@@ -185,7 +185,7 @@ export default function Watch() {
             const data = change.doc.data();
             const user = getCurrentUser();
 
-            // console.log("changed data", data, user);
+            console.log("Changed data", data, user);
             if (user && data.userId === user.uid) {
               setEncourage([sectionId, data.clap]);
             }

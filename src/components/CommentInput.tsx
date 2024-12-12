@@ -116,7 +116,7 @@ const CommentInput = forwardRef<CommentInputRef, CommentInputProps>(
       }
       const result = await handleAdd(videoId, sectionId, comment, parentId);
       if (result) {
-        console.log(comment);
+        console.log("Comment uploaded", comment);
       } else {
         alert("ERROR: handleComment");
       }
